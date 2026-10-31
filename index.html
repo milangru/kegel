@@ -745,23 +745,58 @@
 
         // Audio synthesizer (Web Audio API - no external assets)
         let audioCtx = null;
-        function playBeep(freq = 440, type = 'sine', duration = 0.15) {
-            if (!userState.settings.sound) return;
+        const liveTones = new Set();
+
+        // AudioContext se mora napraviti/probuditi iz dodira korisnika (mobilni pregledači),
+        // inače prvi zvuci kasne ili ispadnu "polupani".
+        function ensureAudio() {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+            } catch (e) { return null; }
+            return audioCtx;
+        }
+        document.addEventListener('pointerdown', () => {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }, { passive: true });
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        });
+
+        function playBeep(freq = 440, type = 'sine', duration = 0.15) {
+            if (!window.userState.settings.sound) return;
+            const ctx = ensureAudio();
+            if (!ctx) return;
+            try {
+                const t = ctx.currentTime + 0.01;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
                 osc.type = type;
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.frequency.setValueAtTime(freq, t);
+                // mekan početak i kraj (bez pucketanja)
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.linearRampToValueAtTime(0.12, t + 0.012);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
+                gain.connect(ctx.destination);
+                osc.start(t);
+                osc.stop(t + duration + 0.03);
+                const rec = { osc, gain };
+                liveTones.add(rec);
+                osc.onended = () => { liveTones.delete(rec); try { gain.disconnect(); } catch (e) {} };
             } catch (e) {}
+        }
+
+        // Odmah utišaj sve zvukove koji su u toku (pri isključivanju zvuka)
+        function silenceAudio() {
+            liveTones.forEach(({ osc, gain }) => {
+                try {
+                    gain.gain.cancelScheduledValues(0);
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    osc.stop();
+                } catch (e) {}
+            });
+            liveTones.clear();
         }
 
         // Haptic feedback
@@ -1091,6 +1126,7 @@
             workoutEngine.totalStartTime = Date.now();
 
             workoutEngine.totalSeconds = Math.max(1, calculateTotalRemainingSeconds());
+            if (window.userState.settings.sound) ensureAudio();
 
             document.getElementById('tab-home').classList.add('hidden');
             setWorkoutMode(true);
@@ -1380,6 +1416,7 @@
             window.userState.settings.restPause = restVal;
             window.userState.settings.vibration = vibVal;
             window.userState.settings.sound = soundVal;
+            if (!soundVal) silenceAudio();
 
             saveUserDataLocally();
             renderUI();
@@ -1389,7 +1426,8 @@
             window.userState.settings.sound = !window.userState.settings.sound;
             document.getElementById('settingSound').checked = window.userState.settings.sound;
             saveUserDataLocally();
-            if (window.userState.settings.sound) playBeep(600, 'sine', 0.15);
+            if (window.userState.settings.sound) { ensureAudio(); playBeep(600, 'sine', 0.15); }
+            else silenceAudio();
             refreshQuickControls();
         };
 
