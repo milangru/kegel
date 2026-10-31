@@ -197,19 +197,27 @@
                     
                     <button onclick="startWorkout()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-500 text-white font-bold text-base shadow-lg shadow-brand-500/25 transition hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-play text-sm"></i>
-                        <span>Započni Trening</span>
+                        <span id="startBtnLabel">Započni Trening</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Day Selector Horizontal Scroll -->
-            <div class="space-y-2">
+            <!-- Nedelje (horizontalno) + dani izabrane nedelje -->
+            <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400">Plan 1. Nedelje</h3>
-                    <span class="text-xs text-brand-400" id="weekProgressText">1 od 7 završenih</span>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400">Nedelje</h3>
+                    <span class="text-xs text-brand-400" id="totalProgressText">0 od 175 dana</span>
                 </div>
-                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none" id="daysListContainer">
-                    <!-- Dynamic rendering of 7 days cards -->
+                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none" id="weeksListContainer">
+                    <!-- Dinamički: 25 kartica nedelja -->
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400" id="weekTitleText">Plan 1. Nedelje</h3>
+                    <span class="text-xs text-brand-400" id="weekProgressText">0 od 7 završenih</span>
+                </div>
+                <div class="grid grid-cols-7 gap-1.5 sm:gap-2" id="daysListContainer">
+                    <!-- Dinamički: 7 dana izabrane nedelje -->
                 </div>
             </div>
 
@@ -234,7 +242,7 @@
                 <div class="p-3.5 rounded-xl bg-brand-500/5 border border-brand-500/15 flex items-start gap-3">
                     <i class="fa-solid fa-lightbulb text-amber-400 text-lg mt-0.5"></i>
                     <p class="text-xs text-gray-300 leading-relaxed">
-                        <strong>Kako vežbati:</strong> Vežbajte sedeći, stojeći ili ležeći. Ne zadržavajte dah i ne stežite mišiće stomaka ili zadnjice. Telefon zatreperi prilikom svake promene ritma!
+                        <strong>Kako vežbati:</strong> Vežbajte sedeći, stojeći ili ležeći. Ne zadržavajte dah i ne stežite mišiće stomaka ili zadnjice. Telefon vibrira dok traje stezanje (STISNI), a staje čim počne opuštanje.
                     </p>
                 </div>
             </div>
@@ -655,82 +663,60 @@
 
     <!-- CORE APPLICATION LOGIC -->
     <script>
-        // --- WEEK 1 FULL WORKOUT DATA STRUCTURE (7 DAYS) ---
-        const WEEK_PLAN = {
-            1: {
-                title: "Dan 1: Uvodni Trening",
-                blocks: [
-                    { type: 'tension', count: 4, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 8, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 3, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 7, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 4, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            },
-            2: {
-                title: "Dan 2: Progresivni Trening",
-                blocks: [
-                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 10, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 4, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 8, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            },
-            3: {
-                title: "Dan 3: Izazov Izdržljivosti",
-                blocks: [
-                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 12, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 10, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            },
-            4: {
-                title: "Dan 4: Intenziviranje",
-                blocks: [
-                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 12, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 12, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            },
-            5: {
-                title: "Dan 5: Vršni Ritam",
-                blocks: [
-                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 15, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 14, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            },
-            6: {
-                title: "Dan 6: Stabilizacija",
-                blocks: [
-                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 14, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 14, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 8, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            },
-            7: {
-                title: "Dan 7: Nedeljni Izazov",
-                blocks: [
-                    { type: 'tension', count: 8, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 16, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 8, tense: 3, relax: 3, name: 'Tension (Sporo)' },
-                    { type: 'fast', count: 15, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
-                    { type: 'tension', count: 10, tense: 3, relax: 3, name: 'Tension (Sporo)' }
-                ]
-            }
-        };
+        // --- PLAN VEŽBANJA: 25 NEDELJA x 7 DANA x 5 BLOKOVA ---
+        // Svaki dan: [držanje(s), opuštanje(s), ponavljanja blokova 1..5]
+        // Nedelje 1-12: spori · brzi · spori · brzi · spori
+        // Nedelje 13-25: brzi · spori · brzi · spori · brzi (duga držanja, veliki brzi blokovi)
+        // Brzi blokovi su uvek 1 s stisni / 1 s opusti.
+        const TOTAL_WEEKS = 25;
+        const PLAN_SWITCH_DAY = 84;   // od 85. dana (nedelja 13) mijenja se raspored blokova
+        const PLAN_DATA = [
+            /* Nedelja  1 */ [3,3,4,6,4,6,4], [3,3,4,7,4,6,4], [3,3,5,7,4,6,5], [3,3,5,7,4,7,5], [3,3,5,8,4,7,5], [3,3,5,9,4,7,5], [3,3,5,8,5,7,5],
+            /* Nedelja  2 */ [3,3,6,8,5,8,6], [3,3,6,9,5,8,6], [3,3,6,10,5,8,6], [3,3,6,10,5,9,6], [3,3,6,10,5,10,6], [3,3,6,10,6,9,6], [3,3,7,10,6,9,7],
+            /* Nedelja  3 */ [3,3,7,11,6,9,7], [3,3,7,11,6,10,7], [3,3,7,12,6,10,7], [3,3,7,12,6,11,7], [3,3,8,11,6,10,8], [3,3,8,11,7,11,8], [3,3,8,12,7,11,8],
+            /* Nedelja  4 */ [4,4,6,13,5,12,6], [4,4,6,14,5,12,6], [4,4,6,14,5,13,6], [4,4,6,13,6,12,6], [4,4,7,13,6,12,7], [4,4,7,14,6,12,7], [4,4,7,14,6,13,7],
+            /* Nedelja  5 */ [4,4,7,15,6,13,7], [4,4,7,15,6,14,7], [4,4,7,16,6,14,7], [4,4,7,16,6,15,7], [4,4,8,15,7,14,8], [4,4,8,16,7,14,8], [4,4,8,17,7,14,8],
+            /* Nedelja  6 */ [4,4,8,17,7,15,8], [4,4,8,17,7,16,8], [4,4,8,18,7,16,8], [4,4,8,19,7,16,8], [4,4,9,17,7,16,9], [4,4,9,18,7,16,9], [4,4,9,17,8,16,9],
+            /* Nedelja  7 */ [4,4,9,18,8,16,9], [4,4,9,18,8,17,9], [4,4,9,19,8,17,9], [4,4,9,20,8,17,9], [4,4,10,19,8,17,10], [4,4,10,19,8,18,10], [4,4,10,20,8,18,10],
+            /* Nedelja  8 */ [4,4,10,20,9,18,10], [5,4,9,20,8,18,9], [5,4,9,20,8,19,9], [5,4,9,21,8,19,9], [5,4,9,22,8,19,9], [5,4,9,22,8,20,9], [5,4,10,21,8,20,10],
+            /* Nedelja  9 */ [5,4,10,22,8,20,10], [5,4,10,23,8,20,10], [5,4,10,22,9,20,10], [5,4,10,22,9,21,10], [5,4,10,23,9,21,10], [5,4,10,24,9,21,10], [5,4,10,24,9,22,10],
+            /* Nedelja 10 */ [6,4,9,24,8,23,9], [6,5,9,24,7,22,9], [6,5,9,24,8,22,9], [6,5,9,25,8,22,9], [6,5,9,25,8,23,9], [6,5,9,26,8,23,9], [6,5,9,26,8,24,9],
+            /* Nedelja 11 */ [6,5,9,27,8,24,9], [6,5,9,27,8,25,9], [6,5,10,26,8,24,10], [6,5,10,27,8,24,10], [6,5,10,27,8,25,10], [6,5,10,28,8,25,10], [6,5,10,27,9,25,10],
+            /* Nedelja 12 */ [6,5,10,28,9,25,10], [7,5,9,30,8,27,9], [7,5,9,30,8,28,9], [7,5,9,31,8,28,9], [7,5,10,28,8,26,10], [7,5,10,29,8,26,10], [7,5,10,29,8,27,10],
+            /* Nedelja 13 */ [7,5,25,13,22,13,22], [7,5,23,14,20,14,20], [7,5,23,14,21,14,21], [7,5,24,14,21,14,21], [7,5,24,14,22,14,21], [7,5,25,14,22,14,21], [8,5,25,13,22,13,21],
+            /* Nedelja 14 */ [8,5,25,13,22,13,22], [8,5,25,13,23,13,22], [8,5,26,13,23,13,22], [8,5,25,14,22,14,22], [8,6,26,13,22,13,22], [8,6,26,13,23,13,22], [8,6,26,13,23,13,23],
+            /* Nedelja 15 */ [8,6,27,13,23,13,23], [8,6,27,13,24,13,23], [9,6,28,12,25,12,24], [9,6,28,12,25,12,25], [9,6,26,13,24,13,24], [9,6,27,13,24,13,24], [9,6,28,13,24,13,24],
+            /* Nedelja 16 */ [9,6,28,13,25,13,24], [9,6,28,13,25,13,25], [9,6,29,13,25,13,25], [9,6,29,13,26,13,25], [9,6,29,13,26,13,26], [9,6,30,13,26,13,26], [10,6,28,13,25,13,25],
+            /* Nedelja 17 */ [10,6,29,13,25,13,25], [10,6,29,13,26,13,26], [10,6,30,13,26,13,26], [10,6,30,13,27,13,26], [10,7,32,12,28,12,28], [10,7,33,12,28,12,28], [10,7,30,13,27,13,27],
+            /* Nedelja 18 */ [10,7,31,13,27,13,27], [10,7,31,13,28,13,27], [11,7,33,12,30,12,29], [11,7,34,12,30,12,29], [11,7,34,12,30,12,30], [11,7,34,12,31,12,30], [11,7,34,12,31,12,31],
+            /* Nedelja 19 */ [11,7,32,13,28,13,28], [11,7,33,13,28,13,28], [11,7,33,13,29,13,28], [11,7,33,13,29,13,29], [12,7,35,12,32,12,31], [12,7,36,12,32,12,31], [12,7,36,12,32,12,32],
+            /* Nedelja 20 */ [12,7,37,12,32,12,32], [12,7,36,12,33,12,33], [12,7,33,13,30,13,30], [12,7,34,13,30,13,30], [13,7,37,12,33,12,32], [13,7,37,12,33,12,33], [13,7,38,12,33,12,33],
+            /* Nedelja 21 */ [13,7,37,12,34,12,34], [13,7,38,12,34,12,34], [13,7,39,12,34,12,34], [13,7,35,13,31,13,31], [14,7,38,12,34,12,34], [14,7,39,12,34,12,34], [14,7,39,12,35,12,34],
+            /* Nedelja 22 */ [14,7,39,12,35,12,35], [14,7,40,12,35,12,35], [14,7,40,12,36,12,35], [14,8,37,12,33,12,33], [15,8,41,11,37,11,37], [15,8,42,11,37,11,37], [15,8,37,12,33,12,33],
+            /* Nedelja 23 */ [15,8,38,12,33,12,33], [15,8,39,12,33,12,33], [15,8,38,12,34,12,34], [16,8,43,11,38,11,38], [16,8,43,11,39,11,38], [16,8,44,11,39,11,38], [16,8,39,12,34,12,34],
+            /* Nedelja 24 */ [16,8,39,12,35,12,35], [16,8,40,12,35,12,35], [16,8,40,12,36,12,35], [17,8,45,11,40,11,40], [17,8,46,11,40,11,40], [17,8,45,11,41,11,41], [17,8,46,11,41,11,41],
+            /* Nedelja 25 */ [17,8,40,12,36,12,36], [17,8,41,12,36,12,36], [17,8,42,12,36,12,36], [18,8,47,11,41,11,41], [18,8,46,11,42,11,42], [18,8,47,11,42,11,42], [18,8,48,11,42,11,42],
+        ];
+
+        function dayIndex(week, day) { return (week - 1) * 7 + day; }     // 1..175
+        function getDayData(week, day) {
+            const idx = dayIndex(week, day) - 1;
+            const [hold, relax, ...reps] = PLAN_DATA[idx] || PLAN_DATA[0];
+            const kinds = idx < PLAN_SWITCH_DAY ? 'SFSFS' : 'FSFSF';
+            return {
+                title: `Nedelja ${week} · Dan ${day}`,
+                blocks: kinds.split('').map((k, i) => k === 'S'
+                    ? { type: 'tension', count: reps[i], tense: hold, relax: relax, name: 'Tension (Sporo)' }
+                    : { type: 'fast', count: reps[i], tense: 1, relax: 1, name: 'Fast tension (Brzo)' })
+            };
+        }
+        function weekDoneCount(week) {
+            return window.userState.completedDays.filter(n => n > (week - 1) * 7 && n <= week * 7).length;
+        }
 
         // --- APPLICATION STATE ---
         window.userState = {
+            selectedWeek: 1,
             selectedDay: 1,
             completedDays: [],
             streak: 0,
@@ -850,34 +836,69 @@
 
         // --- UI RENDERERS ---
         window.renderUI = function() {
-            const dayNum = window.userState.selectedDay;
-            const dayData = WEEK_PLAN[dayNum] || WEEK_PLAN[1];
+            const st = window.userState;
+            // zaštita od neispravnih vrijednosti
+            if (!Number.isInteger(st.selectedWeek) || st.selectedWeek < 1 || st.selectedWeek > TOTAL_WEEKS) st.selectedWeek = 1;
+            if (!Number.isInteger(st.selectedDay) || st.selectedDay < 1 || st.selectedDay > 7) st.selectedDay = 1;
 
-            // Render Streak and Headers
-            document.getElementById('streakBadgeText').textContent = `Niz: ${window.userState.streak} Dana`;
+            const week = st.selectedWeek, day = st.selectedDay;
+            const dayData = getDayData(week, day);
+            const isDone = st.completedDays.includes(dayIndex(week, day));
+
+            // Zaglavlje
+            document.getElementById('streakBadgeText').textContent = `Niz: ${st.streak} Dana`;
             document.getElementById('currentDayTitle').textContent = dayData.title;
-            document.getElementById('weekProgressText').textContent = `${window.userState.completedDays.length} od 7 završenih`;
+            document.getElementById('startBtnLabel').textContent = isDone ? 'Ponovi Trening' : 'Započni Trening';
+            document.getElementById('weekTitleText').textContent = `Plan ${week}. Nedelje`;
+            document.getElementById('weekProgressText').textContent = `${weekDoneCount(week)} od 7 završenih`;
+            document.getElementById('totalProgressText').textContent = `${st.completedDays.length} od ${TOTAL_WEEKS * 7} dana`;
 
-            // Render Day Selector Cards
+            // Kartice nedelja
+            const weeksContainer = document.getElementById('weeksListContainer');
+            weeksContainer.innerHTML = '';
+            for (let w = 1; w <= TOTAL_WEEKS; w++) {
+                const done = weekDoneCount(w);
+                const all = done === 7;
+                const sel = w === week;
+                const card = document.createElement('button');
+                card.dataset.week = w;
+                card.onclick = () => selectWeek(w);
+                card.className = `flex-shrink-0 w-[6.5rem] p-3 rounded-xl border text-left transition ${
+                    sel ? 'bg-brand-500/20 border-brand-500 text-white'
+                        : (all ? 'glass-card border-brand-500/30 text-gray-300' : 'glass-card border-brand-border text-gray-400 hover:text-white')
+                }`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] uppercase tracking-wider">Nedelja</span>
+                        ${all ? '<i class="fa-solid fa-circle-check text-brand-400 text-xs"></i>' : ''}
+                    </div>
+                    <div class="text-2xl font-bold leading-tight ${sel ? 'text-white' : ''}">${w}</div>
+                    <div class="mt-1.5 h-1 rounded-full bg-brand-border overflow-hidden">
+                        <div class="h-full bg-brand-400" style="width:${(done / 7) * 100}%"></div>
+                    </div>
+                    <div class="text-[10px] mt-1 text-gray-400">${done}/7</div>
+                `;
+                weeksContainer.appendChild(card);
+            }
+            if (window.__lastRenderedWeek !== week) { scrollWeekIntoView(); window.__lastRenderedWeek = week; }
+
+            // Dani izabrane nedelje
             const daysContainer = document.getElementById('daysListContainer');
             daysContainer.innerHTML = '';
             for (let i = 1; i <= 7; i++) {
-                const isCompleted = window.userState.completedDays.includes(i);
-                const isSelected = window.userState.selectedDay === i;
-                
+                const completed = st.completedDays.includes(dayIndex(week, i));
+                const selected = day === i;
                 const card = document.createElement('button');
                 card.onclick = () => selectDay(i);
-                card.className = `flex-shrink-0 w-24 p-3 rounded-xl border text-center transition ${
-                    isSelected 
-                        ? 'bg-brand-500/20 border-brand-500 text-white font-bold' 
+                card.className = `py-2.5 rounded-xl border text-center transition ${
+                    selected
+                        ? 'bg-brand-500/20 border-brand-500 text-white font-bold'
                         : 'glass-card border-brand-border text-gray-400 hover:text-white'
                 }`;
                 card.innerHTML = `
-                    <span class="block text-[10px] uppercase tracking-wider mb-1">Dan ${i}</span>
-                    <div class="text-sm flex items-center justify-center gap-1">
-                        ${isCompleted ? '<i class="fa-solid fa-circle-check text-brand-400"></i>' : '<i class="fa-solid fa-circle text-[8px] opacity-30"></i>'}
-                        <span>${i}. Dan</span>
-                    </div>
+                    <span class="block text-[9px] uppercase tracking-wider">Dan</span>
+                    <span class="block text-base font-bold leading-tight">${i}</span>
+                    ${completed ? '<i class="fa-solid fa-circle-check text-brand-400 text-[11px]"></i>' : '<i class="fa-solid fa-circle text-[7px] opacity-30"></i>'}
                 `;
                 daysContainer.appendChild(card);
             }
@@ -885,11 +906,11 @@
             // Render Workout Blocks Overview
             const blocksContainer = document.getElementById('workoutBlocksOverview');
             blocksContainer.innerHTML = '';
-            let totalSecondsEstimate = 0;
+            let totalSecondsEstimate = 3;   // priprema
 
             dayData.blocks.forEach((block, idx) => {
                 const blockSeconds = block.count * (block.tense + block.relax);
-                totalSecondsEstimate += blockSeconds + window.userState.settings.restPause;
+                totalSecondsEstimate += blockSeconds + (idx < dayData.blocks.length - 1 ? window.userState.settings.restPause : 0);
 
                 const blockEl = document.createElement('div');
                 blockEl.className = "flex items-center justify-between p-3 rounded-xl bg-brand-dark border border-brand-border/60";
@@ -908,8 +929,8 @@
                 blocksContainer.appendChild(blockEl);
             });
 
-            const estMinutes = Math.ceil(totalSecondsEstimate / 60);
-            document.getElementById('totalEstimatedTime').textContent = `~${estMinutes} min`;
+            const estM = Math.floor(totalSecondsEstimate / 60), estS = totalSecondsEstimate % 60;
+            document.getElementById('totalEstimatedTime').textContent = estS ? `${estM} min ${estS} s` : `${estM} min`;
 
             // Stats tab render
             document.getElementById('statStreak').textContent = window.userState.streak;
@@ -928,7 +949,7 @@
                     row.className = "py-2.5 flex justify-between items-center text-xs";
                     row.innerHTML = `
                         <div>
-                            <strong class="text-white">Dan ${item.dayNumber} završen</strong>
+                            <strong class="text-white">Nedelja ${item.week || 1} · Dan ${item.dayNumber} završen</strong>
                             <span class="block text-gray-500 text-[10px]">${item.date}</span>
                         </div>
                         <span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-mono">+1 Trening</span>
@@ -950,6 +971,27 @@
             window.renderUI();
         }
 
+        // Slobodan izbor nedelje: otvara prvi neodrađeni dan te nedelje (ili 1. dan ako je sve odrađeno)
+        function selectWeek(weekNum) {
+            const st = window.userState;
+            st.selectedWeek = weekNum;
+            let first = 1;
+            for (let d = 1; d <= 7; d++) {
+                if (!st.completedDays.includes(dayIndex(weekNum, d))) { first = d; break; }
+            }
+            st.selectedDay = first;
+            window.renderUI();
+        }
+
+        // Centriraj izabranu nedelju u horizontalnoj listi (ne radi ništa dok je ekran sakriven)
+        function scrollWeekIntoView() {
+            const c = document.getElementById('weeksListContainer');
+            if (!c || !c.clientWidth) return;
+            const card = c.querySelector(`[data-week="${window.userState.selectedWeek}"]`);
+            if (!card) return;
+            c.scrollTo({ left: card.offsetLeft - (c.clientWidth - card.clientWidth) / 2, behavior: 'smooth' });
+        }
+
         window.switchTab = function(tabName) {
             setWorkoutMode(false);
             document.getElementById('tab-home').classList.add('hidden');
@@ -962,6 +1004,7 @@
 
             if (tabName === 'home') {
                 document.getElementById('tab-home').classList.remove('hidden');
+                requestAnimationFrame(scrollWeekIntoView);
                 document.getElementById('nav-home').className = "flex flex-col items-center gap-1 p-2 text-brand-400 font-semibold";
             } else if (tabName === 'stats') {
                 document.getElementById('tab-stats').classList.remove('hidden');
@@ -1115,8 +1158,7 @@
         }
 
         window.startWorkout = function() {
-            const dayNum = window.userState.selectedDay;
-            workoutEngine.dayData = WEEK_PLAN[dayNum];
+            workoutEngine.dayData = getDayData(window.userState.selectedWeek, window.userState.selectedDay);
             workoutEngine.active = true;
             workoutEngine.paused = false;
             workoutEngine.blockIndex = 0;
@@ -1359,37 +1401,43 @@
             clearInterval(workoutEngine.intervalId);
             workoutEngine.active = false;
 
-            const dayNum = window.userState.selectedDay;
-            if (!window.userState.completedDays.includes(dayNum)) {
-                window.userState.completedDays.push(dayNum);
+            const st = window.userState;
+            const weekNum = st.selectedWeek;
+            const dayNum = st.selectedDay;
+            const idx = dayIndex(weekNum, dayNum);
+            if (!st.completedDays.includes(idx)) {
+                st.completedDays.push(idx);
             }
 
             // Calculate streak
             const todayStr = new Date().toISOString().split('T')[0];
-            if (window.userState.lastWorkoutDate !== todayStr) {
-                window.userState.streak += 1;
-                window.userState.lastWorkoutDate = todayStr;
+            if (st.lastWorkoutDate !== todayStr) {
+                st.streak += 1;
+                st.lastWorkoutDate = todayStr;
             }
 
             // Save history
             const durationSecs = Math.round((Date.now() - workoutEngine.totalStartTime) / 1000);
-            window.userState.history.push({
+            st.history.push({
                 date: todayStr,
+                week: weekNum,
                 dayNumber: dayNum,
                 durationSeconds: durationSecs
             });
 
-            // Auto advance next day if possible
-            if (dayNum < 7) {
-                window.userState.selectedDay = dayNum + 1;
+            // Automatski sljedeći dan (poslije 7. dana prelazi na 1. dan sljedeće nedelje)
+            if (idx < TOTAL_WEEKS * 7) {
+                st.selectedWeek = Math.floor(idx / 7) + 1;
+                st.selectedDay = (idx % 7) + 1;
             }
 
             saveUserDataLocally();
             renderUI();
 
             // Show Success Modal
-            document.getElementById('completedBlocksCount').textContent = `${WEEK_PLAN[dayNum].blocks.length}/${WEEK_PLAN[dayNum].blocks.length}`;
-            document.getElementById('modalStreakCount').textContent = window.userState.streak;
+            const nBlocks = workoutEngine.dayData.blocks.length;
+            document.getElementById('completedBlocksCount').textContent = `${nBlocks}/${nBlocks}`;
+            document.getElementById('modalStreakCount').textContent = st.streak;
             document.getElementById('successModal').classList.remove('hidden');
 
             switchTab('home');
@@ -1454,14 +1502,17 @@
                     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('format');
 
                     const isDay = n => Number.isInteger(n) && n >= 1 && n <= 7;
+                    const isWeek = n => Number.isInteger(n) && n >= 1 && n <= TOTAL_WEEKS;
+                    const isIdx = n => Number.isInteger(n) && n >= 1 && n <= TOTAL_WEEKS * 7;
                     const def = window.userState;
                     const allowedRest = [5, 10, 15, 20, 30];
 
                     const rs = raw.settings || {};
                     const clean = {
+                        selectedWeek: isWeek(raw.selectedWeek) ? raw.selectedWeek : 1,
                         selectedDay: isDay(raw.selectedDay) ? raw.selectedDay : 1,
                         completedDays: Array.isArray(raw.completedDays)
-                            ? [...new Set(raw.completedDays.filter(isDay))] : [],
+                            ? [...new Set(raw.completedDays.filter(isIdx))] : [],
                         streak: Number.isFinite(raw.streak) && raw.streak >= 0 ? Math.floor(raw.streak) : 0,
                         lastWorkoutDate: typeof raw.lastWorkoutDate === 'string' ? raw.lastWorkoutDate : null,
                         settings: {
@@ -1474,6 +1525,7 @@
                                 .filter(h => h && typeof h.date === 'string' && isDay(h.dayNumber))
                                 .map(h => ({
                                     date: h.date.slice(0, 10),
+                                    week: isWeek(h.week) ? h.week : 1,
                                     dayNumber: h.dayNumber,
                                     durationSeconds: Number.isFinite(h.durationSeconds) && h.durationSeconds >= 0 ? Math.round(h.durationSeconds) : 0
                                 }))
@@ -1507,6 +1559,7 @@
             if (confirm("Da li ste sigurni da želite da obrišete svu lokalnu istoriju vežbi?")) {
                 localStorage.removeItem('kegel_fit_state');
                 window.userState = {
+                    selectedWeek: 1,
                     selectedDay: 1,
                     completedDays: [],
                     streak: 0,
