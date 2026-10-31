@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="sr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kegel Fit - Dnevni Trening Za Karlično Dno</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                            dark: '#0d1117',
+                            card: '#161b22',
+                            border: '#30363d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f3f4f6;
+            touch-action: manipulation;
+        }
+
+        /* Ring visualizer for timer */
+        .circle-progress {
+            transition: stroke-dashoffset 0.1s linear, transform 0.3s ease;
+            transform-origin: center;
+        }
+        
+        .pulse-expand {
+            transform: scale(1.08);
+        }
+        
+        .pulse-contract {
+            transform: scale(0.95);
+        }
+
+        /* Glassmorphism elements */
+        .glass-card {
+            background: rgba(22, 27, 34, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+
+        /* Custom toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
+
+        /* ---- Fullscreen workout (sve u em jedinicama, skalira se prema ekranu) ---- */
+        #workoutScreen { background: #181818; touch-action: manipulation;
+                         font-size: clamp(9px, min(3.4vw, 1.9vh), 17px); }
+        .wk-card { background: #2a2a2a; }
+        .wk-top { border-radius: 0 0 1.8em 1.8em; padding: max(env(safe-area-inset-top), 1.1em) 1em .9em; text-align: center; position: relative; flex-shrink: 0; }
+        .wk-top small { display: block; font-size: .95em; color: #9ca3af; line-height: 1.2; }
+        .wk-name { font-size: 1.4em; font-weight: 700; color: #fff; line-height: 1.15; padding: 0 2.6em; }
+        .wk-round { position: absolute; top: max(env(safe-area-inset-top), 1em); width: 2.6em; height: 2.6em; border-radius: 9999px;
+                    border: 2px solid #4b5563; color: #6b7280; display: flex; align-items: center; justify-content: center; }
+        .wk-round i { font-size: 1.1em; }
+        .wk-round.l { left: 1em; } .wk-round.r { right: 1em; }
+
+        .wk-mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1em; padding: 0 1em; }
+        .wk-headline { font-size: 1.8em; font-weight: 800; color: #fff; text-align: center; line-height: 1.1; }
+
+        .wk-ringwrap { --ring: min(82vw, 38vh); position: relative; width: var(--ring); height: var(--ring); font-size: calc(var(--ring) / 17); flex-shrink: 0; }
+        .wk-ringin { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15% 0; }
+        .wk-grp { display: flex; flex-direction: column; align-items: center; width: 64%; }
+        .wk-tab { font-size: .8em; line-height: 1; padding: .45em 1.2em; font-weight: 600; }
+        .wk-tab.t { border-radius: .7em .7em 0 0; } .wk-tab.b { border-radius: 0 0 .7em .7em; }
+        .wk-bx { width: 100%; text-align: center; font-size: 1.5em; font-weight: 800; line-height: 1; padding: .6em 0;
+                 letter-spacing: .04em; text-transform: uppercase; border-radius: .6em; }
+        .wk-num { font-size: 2.6em; font-weight: 900; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; line-height: 1; color: #fff; }
+
+        .wk-ctrl { padding: 0 1.2em 1.1em; flex-shrink: 0; }
+        .wk-ctrl > div { display: flex; align-items: center; justify-content: space-between; max-width: 28em; margin: 0 auto; }
+        .wk-btn { position: relative; width: 3.8em; height: 3.8em; border-radius: 1.1em; background: #2a2a2a;
+                  display: flex; align-items: center; justify-content: center; color: #34d399; transition: transform .1s, background .2s; }
+        .wk-btn i { font-size: 1.4em; }
+        .wk-btn:active { transform: scale(0.93); }
+        .wk-btn.off { color: #6b7280; }
+        .wk-btn.hl { background: #fff; color: #181818; }
+        .wk-dot { position: absolute; top: .4em; right: .4em; width: .7em; height: .7em; border-radius: 9999px; background: #ef4444; }
+        .wk-pause { width: 5.2em; height: 5.2em; border-radius: 9999px; background: radial-gradient(circle at 30% 25%, #333, #242424);
+                    display: flex; align-items: center; justify-content: center; color: #34d399; transition: transform .1s; }
+        .wk-pause i { font-size: 2em; }
+        .wk-pause:active { transform: scale(0.94); }
+
+        .wk-bottom { border-radius: 1.8em 1.8em 0 0; padding: .9em 2.5em max(env(safe-area-inset-bottom), 1.1em); display: flex; justify-content: space-between; flex-shrink: 0; }
+        .wk-stat { text-align: center; }
+        .wk-stat b { display: block; font-size: 2em; font-weight: 800; color: #fff; line-height: 1.15; }
+        .wk-stat span { font-size: .95em; color: #9ca3af; }
+
+        #ringSvg path { transition: opacity .12s linear; }
+        .wk-box { transition: background .2s, color .2s; }
+
+        /* ---- Stealth mode (diskretni prikaz) ---- */
+        body.stealth #workoutScreen { background: #000 !important; }
+        body.stealth .wk-card { background: #111 !important; }
+        body.stealth #ringSvg { opacity: 0; }
+        body.stealth .wk-box { background: transparent !important; color: #4b5563 !important; }
+        body.stealth #workoutTimerDisplay { color: #4b5563 !important; }
+        body.stealth #workoutHeadline { color: #6b7280 !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation / Header -->
+    <header id="appHeader" class="sticky top-0 z-40 glass-card border-b border-brand-border px-3 py-2 sm:px-8 sm:py-3">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center text-white font-bold text-base sm:text-xl shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide text-white whitespace-nowrap" id="appLogoTitle">Kegel Fit</h1>
+                    <p class="hidden sm:block text-xs text-gray-400">Jačanje karličnog dna</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- User Profile / Auth Status Button -->
+                <button id="authBtn" onclick="openAuthModal()" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs sm:text-sm font-medium whitespace-nowrap transition duration-200">
+                    <img id="userAvatar" src="https://placehold.co/100x100/10b981/ffffff?text=U" alt="Korisnik" class="w-6 h-6 rounded-full hidden">
+                    <i id="userIcon" class="fa-solid fa-user text-brand-400"></i>
+                    <span id="userName" class="max-w-[90px] sm:max-w-[130px] truncate">Prijava</span>
+                </button>
+
+                <!-- Settings Icon -->
+                <button onclick="switchTab('settings')" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border flex items-center justify-center text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+
+        <!-- TAB 1: HOME (Planovi i trening) -->
+        <section id="tab-home" class="space-y-6">
+            
+            <!-- Banner / Daily Streak Card -->
+            <div class="glass-card rounded-2xl p-5 sm:p-6 relative overflow-hidden border border-brand-border">
+                <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-2">
+                            <i class="fa-solid fa-fire text-amber-500"></i> <span id="streakBadgeText">Niz: 0 Dana</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white" id="currentDayTitle">Dan 1: Uvodni Trening</h2>
+                        <p class="text-sm text-gray-400 mt-1 max-w-md">Kombinacija sporih kontrakcija za stabilnost i brzih pulseva za reakciju mišića.</p>
+                    </div>
+                    
+                    <button onclick="startWorkout()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-500 text-white font-bold text-base shadow-lg shadow-brand-500/25 transition hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-play text-sm"></i>
+                        <span>Započni Trening</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Day Selector Horizontal Scroll -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400">Plan 1. Nedelje</h3>
+                    <span class="text-xs text-brand-400" id="weekProgressText">1 od 7 završenih</span>
+                </div>
+                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none" id="daysListContainer">
+                    <!-- Dynamic rendering of 7 days cards -->
+                </div>
+            </div>
+
+            <!-- Current Workout Structure Details (Matching user's requested layout) -->
+            <div class="glass-card rounded-2xl p-5 border border-brand-border space-y-4">
+                <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                    <div>
+                        <h3 class="font-semibold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-brand-400"></i> Struktura današnjeg treninga
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Slobodno disanje tokom celog treninga (Free breathing)</p>
+                    </div>
+                    <span class="text-xs font-mono bg-brand-border text-gray-300 px-2.5 py-1 rounded-md" id="totalEstimatedTime">~3 min</span>
+                </div>
+
+                <!-- Block Cards Container -->
+                <div class="space-y-3" id="workoutBlocksOverview">
+                    <!-- Dynamically filled blocks -->
+                </div>
+
+                <!-- Tip Card -->
+                <div class="p-3.5 rounded-xl bg-brand-500/5 border border-brand-500/15 flex items-start gap-3">
+                    <i class="fa-solid fa-lightbulb text-amber-400 text-lg mt-0.5"></i>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        <strong>Kako vežbati:</strong> Vežbajte sedeći, stojeći ili ležeći. Ne zadržavajte dah i ne stežite mišiće stomaka ili zadnjice. Telefon zatreperi prilikom svake promene ritma!
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- TAB 3: STATISTIKA I ISTORIJA -->
+        <section id="tab-stats" class="hidden space-y-6">
+            <h2 class="text-xl font-bold text-white">Statistika i Napredak</h2>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="glass-card p-4 rounded-xl border border-brand-border text-center">
+                    <i class="fa-solid fa-fire text-2xl text-amber-500 mb-1"></i>
+                    <h4 class="text-2xl font-bold text-white" id="statStreak">0</h4>
+                    <p class="text-xs text-gray-400">Trenutni Niz (Dana)</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl border border-brand-border text-center">
+                    <i class="fa-solid fa-circle-check text-2xl text-brand-400 mb-1"></i>
+                    <h4 class="text-2xl font-bold text-white" id="statCompleted">0</h4>
+                    <p class="text-xs text-gray-400">Odrađenih Treninga</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl border border-brand-border text-center col-span-2 sm:col-span-1">
+                    <i class="fa-solid fa-stopwatch text-2xl text-blue-400 mb-1"></i>
+                    <h4 class="text-2xl font-bold text-white" id="statTime">0m</h4>
+                    <p class="text-xs text-gray-400">Ukupno Vreme</p>
+                </div>
+            </div>
+
+            <!-- Workout History List -->
+            <div class="glass-card rounded-2xl p-5 border border-brand-border space-y-3">
+                <h3 class="font-semibold text-white">Istorija Treninga</h3>
+                <div class="divide-y divide-brand-border" id="historyListContainer">
+                    <p class="text-xs text-gray-500 py-4 text-center">Još uvek nema zabeleženih treninga.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PODEŠAVANJA (SETTINGS) -->
+        <section id="tab-settings" class="hidden space-y-6">
+            <h2 class="text-xl font-bold text-white">Podešavanja Aplikacije</h2>
+
+            <div class="glass-card rounded-2xl p-5 border border-brand-border space-y-5">
+                
+                <!-- Pause duration setting -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold text-white">Pauza Između Blokova</h4>
+                        <p class="text-xs text-gray-400">Trajanje odmora u sekundama (Podrazumevano: 15s)</p>
+                    </div>
+                    <select id="settingRestPause" onchange="updateSettings()" class="bg-brand-dark border border-brand-border text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-500">
+                        <option value="5">5 sekundi</option>
+                        <option value="10">10 sekundi</option>
+                        <option value="15" selected>15 sekundi</option>
+                        <option value="20">20 sekundi</option>
+                        <option value="30">30 sekundi</option>
+                    </select>
+                </div>
+
+                <hr class="border-brand-border">
+
+                <!-- Vibration setting -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold text-white">Vibracija (Haptika)</h4>
+                        <p class="text-xs text-gray-400">Vibracioni signali za stiskanje i opuštanje</p>
+                    </div>
+                    <input type="checkbox" id="settingVibrate" onchange="updateSettings()" checked class="w-5 h-5 accent-brand-500 cursor-pointer">
+                </div>
+
+                <hr class="border-brand-border">
+
+                <!-- Audio guidance -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold text-white">Zvučni Signali</h4>
+                        <p class="text-xs text-gray-400">Kratki tonovi pri promeni ciklusa</p>
+                    </div>
+                    <input type="checkbox" id="settingSound" onchange="updateSettings()" checked class="w-5 h-5 accent-brand-500 cursor-pointer">
+                </div>
+
+                <hr class="border-brand-border">
+
+                <!-- Cloud Sync info -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold text-white">Sinhronizacija Sa Oblakom</h4>
+                        <p class="text-xs text-gray-400" id="cloudSyncStatusText">Korisnik nije prijavljen (lokalni režim)</p>
+                    </div>
+                    <button onclick="openAuthModal()" class="px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold hover:bg-brand-500/20">
+                        Upravljaj
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Danger Zone / Data Reset -->
+            <div class="glass-card rounded-2xl p-5 border border-red-500/20 space-y-3">
+                <h4 class="text-sm font-semibold text-red-400">Upravljanje Podacima</h4>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="exportData()" class="px-3.5 py-2 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs font-medium text-gray-300">
+                        <i class="fa-solid fa-download mr-1"></i> Preuzmi Rezervnu Kopiju (JSON)
+                    </button>
+                    <button onclick="document.getElementById('importFileInput').click()" class="px-3.5 py-2 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs font-medium text-gray-300">
+                        <i class="fa-solid fa-upload mr-1"></i> Učitaj Rezervnu Kopiju (JSON)
+                    </button>
+                    <input type="file" id="importFileInput" accept="application/json,.json" class="hidden" onchange="importData(event)">
+                    <button onclick="resetAllData()" class="px-3.5 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-medium text-red-400">
+                        <i class="fa-solid fa-trash mr-1"></i> Obriši Lokalnu Istoriju
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Mobile Friendly) -->
+    <nav id="mainNav" class="sticky bottom-0 z-40 glass-card border-t border-brand-border px-4 py-2">
+        <div class="max-w-md mx-auto flex justify-around items-center">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 p-2 text-brand-400">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] font-medium">Trening</span>
+            </button>
+            <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span class="text-[10px] font-medium">Statistika</span>
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-sliders text-lg"></i>
+                <span class="text-[10px] font-medium">Podešavanja</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- FULLSCREEN WORKOUT SCREEN -->
+    <div id="workoutScreen" class="hidden fixed inset-0 z-[60] flex flex-col overflow-hidden select-none">
+
+        <!-- Top card: naziv vježbe -->
+        <div class="wk-card wk-top">
+            <button onclick="toggleHelp()" aria-label="Pomoć" class="wk-round l"><i class="fa-solid fa-question"></i></button>
+            <button onclick="abortWorkout()" aria-label="Odustani" class="wk-round r"><i class="fa-solid fa-xmark"></i></button>
+            <small>Vježba</small>
+            <div id="wnExerciseName" class="wk-name">Tension (Sporo)</div>
+        </div>
+
+        <!-- Sredina: naslov + prsten -->
+        <div class="wk-mid">
+            <div id="workoutHeadline" class="wk-headline">Priprema</div>
+
+            <div class="wk-ringwrap">
+                <svg id="ringSvg" viewBox="0 0 300 300" class="absolute inset-0 w-full h-full"></svg>
+
+                <div class="wk-ringin">
+                    <div class="wk-grp">
+                        <div id="tenseTab" class="wk-box wk-tab t">3 s</div>
+                        <div id="tenseBox" class="wk-box wk-bx">Stisni</div>
+                    </div>
+
+                    <span id="workoutTimerDisplay" class="wk-num">3</span>
+
+                    <div class="wk-grp">
+                        <div id="relaxBox" class="wk-box wk-bx">Opusti</div>
+                        <div id="relaxTab" class="wk-box wk-tab b">3 s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brze komande -->
+        <div class="wk-ctrl">
+            <div>
+                <button onclick="toggleStealth()" id="stealthBtn" class="wk-btn" aria-label="Stealth"></button>
+                <button onclick="toggleAudio()" id="audioToggleBtn" class="wk-btn" aria-label="Zvuk"></button>
+                <button onclick="pauseWorkout()" id="pauseBtn" class="wk-pause" aria-label="Pauza"></button>
+                <button onclick="toggleVibration()" id="vibBtn" class="wk-btn" aria-label="Vibracija"></button>
+                <button onclick="skipBlock()" id="skipBtn" class="wk-btn" aria-label="Preskoči"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Donja traka: koja vježba po redu + preostalo vrijeme -->
+        <div class="wk-card wk-bottom">
+            <div class="wk-stat"><b id="wnExerciseNum">1/5</b><span>Vježbe</span></div>
+            <div class="wk-stat"><b id="overallTimerDisplay" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace">00:00</b><span>Preostalo</span></div>
+        </div>
+
+        <!-- Pomoć -->
+        <div id="helpPanel" onclick="toggleHelp()" class="hidden absolute inset-0 bg-black/85 flex items-center justify-center p-6 z-10">
+            <div class="wk-card rounded-2xl p-5 max-w-sm text-gray-200 leading-relaxed space-y-2" style="font-size:1.05em">
+                <p><strong class="text-white">Kako vježbati:</strong> sjedite, stojte ili ležite. Ne zadržavajte dah i ne stežite stomak ili zadnjicu.</p>
+                <p>Slobodno dišite tokom cijelog treninga. Telefon zatreperi pri svakoj promjeni ritma.</p>
+                <p class="text-gray-400" style="font-size:.85em">Dodirnite bilo gdje da zatvorite.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GOOGLE AUTH / ACCOUNT MODAL -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-sm w-full rounded-2xl p-6 border border-brand-border text-center relative space-y-4">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="w-14 h-14 rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-2xl mx-auto">
+                <i class="fa-solid fa-cloud"></i>
+            </div>
+
+            <h3 class="text-xl font-bold text-white">Sinhronizacija Nalozi</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">
+                Prijavite se putem Google nalozi da biste sačuvali sve vežbe, istoriju i nizove u bazi podataka. Vaš napredak biće dostupan na svim uređajima!
+            </p>
+
+            <div id="authModalActionContainer" class="pt-2">
+                <!-- Login with Google Button -->
+                <button onclick="handleGoogleSignIn()" id="googleSignInBtn" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-sm flex items-center justify-center gap-3 transition shadow-lg">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Prijavi se sa Google-om</span>
+                </button>
+            </div>
+
+            <p class="text-[10px] text-gray-500">Podaci se čuvaju u bezbednoj Firebase Firestore bazi.</p>
+        </div>
+    </div>
+
+    <!-- SUCCESS WORKOUT MODAL -->
+    <div id="successModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-sm w-full rounded-2xl p-6 border border-brand-500/30 text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-3xl mx-auto animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 class="text-2xl font-black text-white">Čestitamo!</h3>
+            <p class="text-sm text-gray-300">Uspešno ste odradili današnji trening karličnog dna.</p>
+            
+            <div class="p-3 bg-brand-card rounded-xl border border-brand-border flex justify-around text-xs">
+                <div>
+                    <span class="block text-gray-400">Ukupno blokova</span>
+                    <strong class="text-white text-sm" id="completedBlocksCount">5/5</strong>
+                </div>
+                <div>
+                    <span class="block text-gray-400">Niz Dana</span>
+                    <strong class="text-amber-400 text-sm" id="modalStreakCount">1</strong>
+                </div>
+            </div>
+
+            <button onclick="closeSuccessModal()" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/30">
+                Sjajno, Nastavi
+            </button>
+        </div>
+    </div>
+
+    <!-- FIREBASE SDK & APP SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            signOut, 
+            onAuthStateChanged,
+            signInWithCustomToken,
+            signInAnonymously
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            updateDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global state for Firebase
+        let auth, db, currentUser = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kegel-fit-app';
+
+        // Initialize Firebase
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' 
+                ? JSON.parse(__firebase_config) 
+                : {
+                    apiKey: "AIzaSyDemoDummyKeyForPreviewModeOnly",
+                    authDomain: "kegel-fit-demo.firebaseapp.com",
+                    projectId: "kegel-fit-demo",
+                    storageBucket: "kegel-fit-demo.appspot.com",
+                    messagingSenderId: "123456789",
+                    appId: "1:123456789:web:abcdef"
+                };
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Auth State Listener
+            onAuthStateChanged(auth, async (user) => {
+                currentUser = user;
+                updateAuthUI(user);
+                if (user) {
+                    await syncDataFromCloud();
+                }
+            });
+
+            // Initial auto-auth check
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                signInWithCustomToken(auth, __initial_auth_token).catch(() => {});
+            }
+        } catch (err) {
+            console.warn("Firebase Init fallback:", err);
+        }
+
+        // Google Sign In Handler
+        window.handleGoogleSignIn = async function() {
+            if (!auth) {
+                alert("Firebase nije inicijalizovan.");
+                return;
+            }
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+                updateAuthUI(currentUser);
+                closeAuthModal();
+                await syncDataFromCloud();
+            } catch (error) {
+                console.error("Google Auth error:", error);
+                alert("Prijava nije uspela: " + error.message);
+            }
+        };
+
+        window.handleSignOut = async function() {
+            if (auth) {
+                await signOut(auth);
+                currentUser = null;
+                updateAuthUI(null);
+                closeAuthModal();
+            }
+        };
+
+        // Firestore sync functions
+        async function syncDataFromCloud() {
+            if (!currentUser || !db) return;
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'userProfile');
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists()) {
+                    const cloudData = docSnap.data();
+                    window.userState = { ...window.userState, ...cloudData };
+                    window.saveUserDataLocally();
+                    window.renderUI();
+                } else {
+                    // Push current state to cloud
+                    await setDoc(userDocRef, window.userState);
+                }
+            } catch (e) {
+                console.error("Firestore sync read error:", e);
+            }
+        }
+
+        window.syncDataToCloud = async function() {
+            if (!currentUser || !db) return;
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'userProfile');
+                await setDoc(userDocRef, window.userState, { merge: true });
+            } catch (e) {
+                console.error("Firestore sync write error:", e);
+            }
+        }
+
+        function updateAuthUI(user) {
+            const userNameEl = document.getElementById('userName');
+            const userAvatarEl = document.getElementById('userAvatar');
+            const userIconEl = document.getElementById('userIcon');
+            const syncStatusEl = document.getElementById('cloudSyncStatusText');
+            const modalActionEl = document.getElementById('authModalActionContainer');
+
+            if (user) {
+                userNameEl.textContent = user.displayName || user.email || "Korisnik";
+                if (user.photoURL) {
+                    userAvatarEl.src = user.photoURL;
+                    userAvatarEl.classList.remove('hidden');
+                    userIconEl.classList.add('hidden');
+                }
+                syncStatusEl.textContent = `Prijavljen kao: ${user.email || user.displayName}`;
+                
+                modalActionEl.innerHTML = `
+                    <div class="p-3 bg-brand-card rounded-xl mb-3 text-left">
+                        <span class="block text-xs text-gray-400">Prijavljen nalog</span>
+                        <strong class="text-sm text-white">${user.displayName || 'Korisnik'}</strong>
+                        <p class="text-xs text-gray-400 truncate">${user.email || ''}</p>
+                    </div>
+                    <button onclick="handleSignOut()" class="w-full py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-sm font-semibold">
+                        Odjavi se
+                    </button>
+                `;
+            } else {
+                userNameEl.textContent = "Prijava";
+                userAvatarEl.classList.add('hidden');
+                userIconEl.classList.remove('hidden');
+                syncStatusEl.textContent = "Korisnik nije prijavljen (lokalni režim)";
+                
+                modalActionEl.innerHTML = `
+                    <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-sm flex items-center justify-center gap-3 transition shadow-lg">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Prijavi se sa Google-om</span>
+                    </button>
+                `;
+            }
+        }
+    </script>
+
+    <!-- CORE APPLICATION LOGIC -->
+    <script>
+        // --- WEEK 1 FULL WORKOUT DATA STRUCTURE (7 DAYS) ---
+        const WEEK_PLAN = {
+            1: {
+                title: "Dan 1: Uvodni Trening",
+                blocks: [
+                    { type: 'tension', count: 4, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 8, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 3, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 7, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 4, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            },
+            2: {
+                title: "Dan 2: Progresivni Trening",
+                blocks: [
+                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 10, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 4, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 8, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            },
+            3: {
+                title: "Dan 3: Izazov Izdržljivosti",
+                blocks: [
+                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 12, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 5, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 10, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            },
+            4: {
+                title: "Dan 4: Intenziviranje",
+                blocks: [
+                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 12, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 12, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            },
+            5: {
+                title: "Dan 5: Vršni Ritam",
+                blocks: [
+                    { type: 'tension', count: 6, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 15, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 14, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            },
+            6: {
+                title: "Dan 6: Stabilizacija",
+                blocks: [
+                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 14, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 7, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 14, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 8, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            },
+            7: {
+                title: "Dan 7: Nedeljni Izazov",
+                blocks: [
+                    { type: 'tension', count: 8, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 16, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 8, tense: 3, relax: 3, name: 'Tension (Sporo)' },
+                    { type: 'fast', count: 15, tense: 1, relax: 1, name: 'Fast tension (Brzo)' },
+                    { type: 'tension', count: 10, tense: 3, relax: 3, name: 'Tension (Sporo)' }
+                ]
+            }
+        };
+
+        // --- APPLICATION STATE ---
+        window.userState = {
+            selectedDay: 1,
+            completedDays: [],
+            streak: 0,
+            lastWorkoutDate: null,
+            settings: {
+                restPause: 15,
+                vibration: true,
+                sound: true
+            },
+            history: []
+        };
+
+        // Audio synthesizer (Web Audio API - no external assets)
+        let audioCtx = null;
+        function playBeep(freq = 440, type = 'sine', duration = 0.15) {
+            if (!userState.settings.sound) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // Haptic feedback
+        function triggerHaptic(type) {
+            if (!userState.settings.vibration || !('vibrate' in navigator)) return;
+            if (type === 'tense') navigator.vibrate([100, 50, 100]);
+            else if (type === 'relax') navigator.vibrate(150);
+            else if (type === 'pulse') navigator.vibrate(60);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            loadLocalUserData();
+            buildRing(12);
+            renderUI();
+        };
+
+        window.loadLocalUserData = function() {
+            const saved = localStorage.getItem('kegel_fit_state');
+            if (saved) {
+                try {
+                    window.userState = { ...window.userState, ...JSON.parse(saved) };
+                } catch(e){}
+            }
+        };
+
+        window.saveUserDataLocally = function() {
+            localStorage.setItem('kegel_fit_state', JSON.stringify(window.userState));
+            if (window.syncDataToCloud) window.syncDataToCloud();
+        };
+
+        // --- UI RENDERERS ---
+        window.renderUI = function() {
+            const dayNum = window.userState.selectedDay;
+            const dayData = WEEK_PLAN[dayNum] || WEEK_PLAN[1];
+
+            // Render Streak and Headers
+            document.getElementById('streakBadgeText').textContent = `Niz: ${window.userState.streak} Dana`;
+            document.getElementById('currentDayTitle').textContent = dayData.title;
+            document.getElementById('weekProgressText').textContent = `${window.userState.completedDays.length} od 7 završenih`;
+
+            // Render Day Selector Cards
+            const daysContainer = document.getElementById('daysListContainer');
+            daysContainer.innerHTML = '';
+            for (let i = 1; i <= 7; i++) {
+                const isCompleted = window.userState.completedDays.includes(i);
+                const isSelected = window.userState.selectedDay === i;
+                
+                const card = document.createElement('button');
+                card.onclick = () => selectDay(i);
+                card.className = `flex-shrink-0 w-24 p-3 rounded-xl border text-center transition ${
+                    isSelected 
+                        ? 'bg-brand-500/20 border-brand-500 text-white font-bold' 
+                        : 'glass-card border-brand-border text-gray-400 hover:text-white'
+                }`;
+                card.innerHTML = `
+                    <span class="block text-[10px] uppercase tracking-wider mb-1">Dan ${i}</span>
+                    <div class="text-sm flex items-center justify-center gap-1">
+                        ${isCompleted ? '<i class="fa-solid fa-circle-check text-brand-400"></i>' : '<i class="fa-solid fa-circle text-[8px] opacity-30"></i>'}
+                        <span>${i}. Dan</span>
+                    </div>
+                `;
+                daysContainer.appendChild(card);
+            }
+
+            // Render Workout Blocks Overview
+            const blocksContainer = document.getElementById('workoutBlocksOverview');
+            blocksContainer.innerHTML = '';
+            let totalSecondsEstimate = 0;
+
+            dayData.blocks.forEach((block, idx) => {
+                const blockSeconds = block.count * (block.tense + block.relax);
+                totalSecondsEstimate += blockSeconds + window.userState.settings.restPause;
+
+                const blockEl = document.createElement('div');
+                blockEl.className = "flex items-center justify-between p-3 rounded-xl bg-brand-dark border border-brand-border/60";
+                blockEl.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg ${block.type === 'tension' ? 'bg-brand-500/10 text-brand-400' : 'bg-emerald-400/10 text-emerald-300'} flex items-center justify-center text-xs">
+                            <i class="fa-solid ${block.type === 'tension' ? 'fa-bolt' : 'fa-circle-dot'}"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-white">${block.name}</h4>
+                            <p class="text-[11px] text-gray-400">Tense x ${block.tense}s - Relax x ${block.relax}s</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold font-mono text-gray-300">x${block.count}</span>
+                `;
+                blocksContainer.appendChild(blockEl);
+            });
+
+            const estMinutes = Math.ceil(totalSecondsEstimate / 60);
+            document.getElementById('totalEstimatedTime').textContent = `~${estMinutes} min`;
+
+            // Stats tab render
+            document.getElementById('statStreak').textContent = window.userState.streak;
+            document.getElementById('statCompleted').textContent = window.userState.completedDays.length;
+            const totalSecs = window.userState.history.reduce((acc, curr) => acc + (curr.durationSeconds || 0), 0);
+            document.getElementById('statTime').textContent = `${Math.round(totalSecs / 60)}m`;
+
+            // History render
+            const historyContainer = document.getElementById('historyListContainer');
+            if (window.userState.history.length === 0) {
+                historyContainer.innerHTML = `<p class="text-xs text-gray-500 py-4 text-center">Još uvek nema zabeleženih treninga.</p>`;
+            } else {
+                historyContainer.innerHTML = '';
+                [...window.userState.history].reverse().forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = "py-2.5 flex justify-between items-center text-xs";
+                    row.innerHTML = `
+                        <div>
+                            <strong class="text-white">Dan ${item.dayNumber} završen</strong>
+                            <span class="block text-gray-500 text-[10px]">${item.date}</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-mono">+1 Trening</span>
+                    `;
+                    historyContainer.appendChild(row);
+                });
+            }
+
+            // Settings dropdown
+            document.getElementById('settingRestPause').value = window.userState.settings.restPause;
+            document.getElementById('settingVibrate').checked = window.userState.settings.vibration;
+            document.getElementById('settingSound').checked = window.userState.settings.sound;
+
+            refreshQuickControls();
+        };
+
+        function selectDay(dayNum) {
+            window.userState.selectedDay = dayNum;
+            window.renderUI();
+        }
+
+        window.switchTab = function(tabName) {
+            setWorkoutMode(false);
+            document.getElementById('tab-home').classList.add('hidden');
+            document.getElementById('tab-stats').classList.add('hidden');
+            document.getElementById('tab-settings').classList.add('hidden');
+
+            document.getElementById('nav-home').className = "flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white";
+            document.getElementById('nav-stats').className = "flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white";
+            document.getElementById('nav-settings').className = "flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white";
+
+            if (tabName === 'home') {
+                document.getElementById('tab-home').classList.remove('hidden');
+                document.getElementById('nav-home').className = "flex flex-col items-center gap-1 p-2 text-brand-400 font-semibold";
+            } else if (tabName === 'stats') {
+                document.getElementById('tab-stats').classList.remove('hidden');
+                document.getElementById('nav-stats').className = "flex flex-col items-center gap-1 p-2 text-brand-400 font-semibold";
+            } else if (tabName === 'settings') {
+                document.getElementById('tab-settings').classList.remove('hidden');
+                document.getElementById('nav-settings').className = "flex flex-col items-center gap-1 p-2 text-brand-400 font-semibold";
+            }
+        };
+
+        // --- WORKOUT ENGINE LOGIC ---
+        let workoutEngine = {
+            active: false,
+            paused: false,
+            dayData: null,
+            blockIndex: 0,
+            repIndex: 0,
+            phase: 'prepare', // 'prepare', 'tense', 'relax', 'rest'
+            timerSeconds: 3,
+            intervalId: null,
+            totalStartTime: null,
+            totalSeconds: 1,
+            lastTick: 0,
+            frozen: 0,
+            phaseMax: 3
+        };
+        let ringRaf = null;
+        let ringCount = 12;
+        const PHASE_COLORS = { prepare: '#f59e0b', tense: '#34d399', relax: '#60a5fa', rest: '#c084fc' };
+
+        function polar(cx, cy, r, deg) {
+            const a = deg * Math.PI / 180;
+            return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+        }
+
+        // Prsten: jedan segment = jedno ponavljanje u trenutnom bloku
+        function buildRing(n) {
+            const svg = document.getElementById('ringSvg');
+            if (!svg) return;
+            ringCount = Math.max(1, n | 0);
+            const NS = 'http://www.w3.org/2000/svg';
+            svg.innerHTML = '';
+            const SW = 17, R = 128;
+            const step = 360 / ringCount;
+            const capDeg = (SW / R) * (180 / Math.PI);          // zaobljeni krajevi "pojedu" dio razmaka
+            const gapDeg = Math.min(6, step * 0.22);            // vidljiv razmak između segmenata
+            const arcLen = Math.max(0.5, step - capDeg - gapDeg);
+            const pad = (step - arcLen) / 2;
+            for (let layer = 0; layer < 2; layer++) {
+                for (let i = 0; i < ringCount; i++) {
+                    const a0 = -90 + i * step + pad;
+                    const a1 = a0 + arcLen;
+                    const [x1, y1] = polar(150, 150, R, a0);
+                    const [x2, y2] = polar(150, 150, R, a1);
+                    const path = document.createElementNS(NS, 'path');
+                    path.setAttribute('d', `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${R} ${R} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`);
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke-width', SW);
+                    path.setAttribute('stroke-linecap', 'round');
+                    if (layer === 0) {
+                        path.setAttribute('stroke', 'rgba(52,211,153,0.17)');
+                    } else {
+                        path.setAttribute('stroke', '#34d399');
+                        path.setAttribute('class', 'ring-lit');
+                        path.style.opacity = 0;
+                    }
+                    svg.appendChild(path);
+                }
+            }
+        }
+
+        // Koliko je segmenata "upaljeno" (decimalno, glatko između otkucaja)
+        function ringFrame() {
+            if (!workoutEngine.active) return;
+            const we = workoutEngine;
+            const e = we.paused ? we.frozen : Math.min(1, (performance.now() - we.lastTick) / 1000);
+            let lit;
+            if (we.phase === 'tense' || we.phase === 'relax') {
+                const b = we.dayData.blocks[we.blockIndex];
+                const repLen = b.tense + b.relax;
+                const doneInRep = we.phase === 'tense'
+                    ? (b.tense - we.timerSeconds) + e
+                    : b.tense + (b.relax - we.timerSeconds) + e;
+                lit = (we.repIndex - 1) + Math.min(1, doneInRep / repLen);
+            } else {
+                // priprema / odmor: prsten se puni prema proteklom vremenu
+                const max = we.phaseMax || 1;
+                lit = Math.min(1, Math.max(0, (max - we.timerSeconds + e) / max)) * ringCount;
+            }
+            document.querySelectorAll('#ringSvg .ring-lit').forEach((seg, i) => {
+                seg.style.opacity = Math.max(0, Math.min(1, lit - i));
+            });
+            ringRaf = requestAnimationFrame(ringFrame);
+        }
+        let stealthOn = false;
+
+        // Helper to calculate total remaining seconds in active workout
+        function calculateTotalRemainingSeconds() {
+            if (!workoutEngine.dayData) return 0;
+            const blocks = workoutEngine.dayData.blocks;
+            const restPause = window.userState.settings.restPause;
+            let total = 0;
+
+            // Current block remaining time
+            const curBlock = blocks[workoutEngine.blockIndex];
+            if (curBlock) {
+                // Remaining seconds in current phase
+                total += workoutEngine.timerSeconds;
+
+                // Remaining phases in current rep
+                if (workoutEngine.phase === 'prepare') {
+                    // Prepare adds to total, then all reps remain
+                    total += curBlock.count * (curBlock.tense + curBlock.relax);
+                } else if (workoutEngine.phase === 'tense') {
+                    // Finish current tense, plus relax for current rep
+                    total += curBlock.relax;
+                    // Remaining reps in current block
+                    const remainingReps = curBlock.count - workoutEngine.repIndex;
+                    total += remainingReps * (curBlock.tense + curBlock.relax);
+                } else if (workoutEngine.phase === 'relax') {
+                    // Remaining reps in current block
+                    const remainingReps = curBlock.count - workoutEngine.repIndex;
+                    total += remainingReps * (curBlock.tense + curBlock.relax);
+                }
+
+                // If currently resting, next blocks remain
+                if (workoutEngine.phase !== 'rest') {
+                    // Rest after current block if not last block
+                    if (workoutEngine.blockIndex < blocks.length - 1) {
+                        total += restPause;
+                    }
+                }
+            }
+
+            // Future blocks remaining time
+            for (let i = workoutEngine.blockIndex + 1; i < blocks.length; i++) {
+                const b = blocks[i];
+                total += b.count * (b.tense + b.relax);
+                if (i < blocks.length - 1) {
+                    total += restPause;
+                }
+            }
+
+            return Math.max(0, total);
+        }
+
+        function formatTimeMMSS(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        window.startWorkout = function() {
+            const dayNum = window.userState.selectedDay;
+            workoutEngine.dayData = WEEK_PLAN[dayNum];
+            workoutEngine.active = true;
+            workoutEngine.paused = false;
+            workoutEngine.blockIndex = 0;
+            workoutEngine.repIndex = 1;
+            workoutEngine.phase = 'prepare';
+            workoutEngine.timerSeconds = 3;
+            workoutEngine.totalStartTime = Date.now();
+
+            workoutEngine.totalSeconds = Math.max(1, calculateTotalRemainingSeconds());
+
+            document.getElementById('tab-home').classList.add('hidden');
+            setWorkoutMode(true);
+            refreshQuickControls();
+
+            runWorkoutLoop();
+        };
+
+        function runWorkoutLoop() {
+            clearInterval(workoutEngine.intervalId);
+            workoutEngine.lastTick = performance.now();
+            workoutEngine.frozen = 0;
+            updateWorkoutScreenUI();
+            cancelAnimationFrame(ringRaf);
+            ringRaf = requestAnimationFrame(ringFrame);
+
+            workoutEngine.intervalId = setInterval(() => {
+                if (workoutEngine.paused) return;
+
+                workoutEngine.lastTick = performance.now();
+                workoutEngine.timerSeconds--;
+                updateWorkoutScreenUI();
+
+                if (workoutEngine.timerSeconds <= 0) {
+                    advanceWorkoutPhase();
+                }
+            }, 1000);
+        }
+
+        function advanceWorkoutPhase() {
+            const currentBlock = workoutEngine.dayData.blocks[workoutEngine.blockIndex];
+
+            if (workoutEngine.phase === 'prepare') {
+                workoutEngine.phase = 'tense';
+                workoutEngine.timerSeconds = currentBlock.tense;
+                playBeep(600, 'sine', 0.2);
+                triggerHaptic('tense');
+            } 
+            else if (workoutEngine.phase === 'tense') {
+                workoutEngine.phase = 'relax';
+                workoutEngine.timerSeconds = currentBlock.relax;
+                playBeep(400, 'sine', 0.15);
+                triggerHaptic('relax');
+            } 
+            else if (workoutEngine.phase === 'relax') {
+                if (workoutEngine.repIndex < currentBlock.count) {
+                    workoutEngine.repIndex++;
+                    workoutEngine.phase = 'tense';
+                    workoutEngine.timerSeconds = currentBlock.tense;
+                    playBeep(600, 'sine', 0.2);
+                    triggerHaptic('tense');
+                } else {
+                    // Block completed
+                    if (workoutEngine.blockIndex < workoutEngine.dayData.blocks.length - 1) {
+                        workoutEngine.phase = 'rest';
+                        workoutEngine.timerSeconds = window.userState.settings.restPause;
+                        playBeep(800, 'triangle', 0.3);
+                    } else {
+                        // Entire workout complete!
+                        finishWorkout();
+                        return;
+                    }
+                }
+            } 
+            else if (workoutEngine.phase === 'rest') {
+                workoutEngine.blockIndex++;
+                workoutEngine.repIndex = 1;
+                workoutEngine.phase = 'tense';
+                const nextBlock = workoutEngine.dayData.blocks[workoutEngine.blockIndex];
+                workoutEngine.timerSeconds = nextBlock.tense;
+                playBeep(600, 'sine', 0.2);
+                triggerHaptic('tense');
+            }
+
+            updateWorkoutScreenUI();
+        }
+
+        function updateWorkoutScreenUI() {
+            if (!workoutEngine.active) return;
+
+            const blocks = workoutEngine.dayData.blocks;
+            const phase = workoutEngine.phase;
+            const curBlock = blocks[workoutEngine.blockIndex];
+
+            // Tokom odmora prikazujemo sljedeću vježbu
+            const shownIdx = phase === 'rest'
+                ? Math.min(workoutEngine.blockIndex + 1, blocks.length - 1)
+                : workoutEngine.blockIndex;
+            const shown = blocks[shownIdx];
+
+            // Broj segmenata prstena = broj ponavljanja u bloku koji se prikazuje
+            if (shown.count !== ringCount || !document.querySelector('#ringSvg .ring-lit')) buildRing(shown.count);
+
+            document.getElementById('wnExerciseName').textContent = shown.name;
+            document.getElementById('wnExerciseNum').textContent = `${shownIdx + 1}/${blocks.length}`;
+            document.getElementById('overallTimerDisplay').textContent = formatTimeMMSS(calculateTotalRemainingSeconds());
+
+            // Naslov iznad prstena
+            const headline = document.getElementById('workoutHeadline');
+            if (phase === 'prepare') headline.textContent = 'Priprema';
+            else if (phase === 'rest') headline.textContent = 'Odmor';
+            else headline.textContent = `Ponavljanje ${workoutEngine.repIndex} od ${curBlock.count}`;
+
+            // Trajanja u oznakama
+            document.getElementById('tenseTab').textContent = `${shown.tense} s`;
+            document.getElementById('relaxTab').textContent = `${shown.relax} s`;
+
+            // Maksimum trenutne faze (za animaciju prstena)
+            let maxSeconds = 3;
+            if (phase === 'tense') maxSeconds = curBlock.tense;
+            else if (phase === 'relax') maxSeconds = curBlock.relax;
+            else if (phase === 'rest') maxSeconds = window.userState.settings.restPause;
+            workoutEngine.phaseMax = maxSeconds;
+
+            const color = PHASE_COLORS[phase] || PHASE_COLORS.tense;
+            const ringColor = (phase === 'tense' || phase === 'relax') ? PHASE_COLORS.tense : color;
+            document.querySelectorAll('#ringSvg .ring-lit').forEach(seg => seg.setAttribute('stroke', ringColor));
+
+            // Isticanje aktivne oznake (STISNI / OPUSTI)
+            const styleBox = (boxId, tabId, active) => {
+                [boxId, tabId].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.style.background = active ? color : 'rgba(52,211,153,0.12)';
+                    el.style.color = active ? '#ffffff' : '#6b7280';
+                });
+            };
+            styleBox('tenseBox', 'tenseTab', phase === 'tense');
+            styleBox('relaxBox', 'relaxTab', phase === 'relax');
+
+            const timerEl = document.getElementById('workoutTimerDisplay');
+            timerEl.textContent = workoutEngine.timerSeconds;
+            timerEl.style.color = color;
+        }
+
+        window.pauseWorkout = function() {
+            workoutEngine.paused = !workoutEngine.paused;
+            if (workoutEngine.paused) {
+                workoutEngine.frozen = Math.min(1, (performance.now() - workoutEngine.lastTick) / 1000);
+            } else {
+                workoutEngine.lastTick = performance.now() - workoutEngine.frozen * 1000;
+            }
+            refreshQuickControls();
+        };
+
+        window.toggleHelp = function() {
+            document.getElementById('helpPanel').classList.toggle('hidden');
+        };
+
+        window.toggleStealth = function() {
+            stealthOn = !stealthOn;
+            document.body.classList.toggle('stealth', stealthOn);
+            refreshQuickControls();
+        };
+
+        window.toggleVibration = function() {
+            window.userState.settings.vibration = !window.userState.settings.vibration;
+            document.getElementById('settingVibrate').checked = window.userState.settings.vibration;
+            saveUserDataLocally();
+            if (window.userState.settings.vibration) triggerHaptic('pulse');
+            refreshQuickControls();
+        };
+
+        // Fullscreen ekran vježbanja preko svega (zaglavlje i meni se ne vide)
+        function setWorkoutMode(on) {
+            document.getElementById('workoutScreen').classList.toggle('hidden', !on);
+            document.getElementById('appHeader').classList.toggle('hidden', on);
+            document.getElementById('mainNav').classList.toggle('hidden', on);
+            document.body.style.overflow = on ? 'hidden' : '';
+            if (!on) document.getElementById('helpPanel').classList.add('hidden');
+        }
+
+        // Osvježava izgled brzih dugmadi prema stanju
+        function refreshQuickControls() {
+            const st = window.userState.settings;
+            const DOT = '<span class="wk-dot"></span>';
+            const setBtn = (id, cls, html) => {
+                const b = document.getElementById(id);
+                if (!b) return;
+                b.className = 'wk-btn ' + cls;
+                b.innerHTML = html;
+            };
+            setBtn('stealthBtn', stealthOn ? 'hl' : '',
+                stealthOn ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye-slash"></i>');
+            setBtn('audioToggleBtn', st.sound ? '' : 'off',
+                st.sound ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>' + DOT);
+            setBtn('vibBtn', st.vibration ? '' : 'off',
+                '<i class="fa-solid fa-mobile-screen-button"></i>' + (st.vibration ? '' : DOT));
+
+            const pb = document.getElementById('pauseBtn');
+            if (pb) {
+                pb.innerHTML = workoutEngine.paused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+                pb.setAttribute('aria-label', workoutEngine.paused ? 'Nastavi' : 'Pauza');
+            }
+        }
+
+        // Preskoči: vježba -> odmor, odmor -> sljedeća vježba
+        window.skipBlock = function() {
+            if (!workoutEngine.active) return;
+            const blocks = workoutEngine.dayData.blocks;
+
+            if (workoutEngine.phase === 'rest') {
+                // iz odmora na sljedeću vježbu
+                workoutEngine.blockIndex++;
+                workoutEngine.repIndex = 1;
+                workoutEngine.phase = 'tense';
+                workoutEngine.timerSeconds = blocks[workoutEngine.blockIndex].tense;
+                playBeep(600, 'sine', 0.2);
+                triggerHaptic('tense');
+            } else if (workoutEngine.blockIndex < blocks.length - 1) {
+                // iz vježbe (ili pripreme) na odmor
+                workoutEngine.phase = 'rest';
+                workoutEngine.timerSeconds = window.userState.settings.restPause;
+                playBeep(800, 'triangle', 0.3);
+            } else {
+                // posljednja vježba: nema odmora, preskakanje završava trening
+                if (confirm('Preskočiti posljednju vježbu i završiti trening?')) finishWorkout();
+                return;
+            }
+            runWorkoutLoop(); // restartuje otkucaj da prvi sekund nakon preskakanja traje punih 1s
+        };
+
+        window.abortWorkout = function() {
+            clearInterval(workoutEngine.intervalId);
+            workoutEngine.active = false;
+            switchTab('home');
+        };
+
+        function finishWorkout() {
+            clearInterval(workoutEngine.intervalId);
+            workoutEngine.active = false;
+
+            const dayNum = window.userState.selectedDay;
+            if (!window.userState.completedDays.includes(dayNum)) {
+                window.userState.completedDays.push(dayNum);
+            }
+
+            // Calculate streak
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (window.userState.lastWorkoutDate !== todayStr) {
+                window.userState.streak += 1;
+                window.userState.lastWorkoutDate = todayStr;
+            }
+
+            // Save history
+            const durationSecs = Math.round((Date.now() - workoutEngine.totalStartTime) / 1000);
+            window.userState.history.push({
+                date: todayStr,
+                dayNumber: dayNum,
+                durationSeconds: durationSecs
+            });
+
+            // Auto advance next day if possible
+            if (dayNum < 7) {
+                window.userState.selectedDay = dayNum + 1;
+            }
+
+            saveUserDataLocally();
+            renderUI();
+
+            // Show Success Modal
+            document.getElementById('completedBlocksCount').textContent = `${WEEK_PLAN[dayNum].blocks.length}/${WEEK_PLAN[dayNum].blocks.length}`;
+            document.getElementById('modalStreakCount').textContent = window.userState.streak;
+            document.getElementById('successModal').classList.remove('hidden');
+
+            switchTab('home');
+        }
+
+        window.closeSuccessModal = function() {
+            document.getElementById('successModal').classList.add('hidden');
+        };
+
+        // --- AUTH & MODALS LOGIC ---
+        window.openAuthModal = function() {
+            document.getElementById('authModal').classList.remove('hidden');
+        };
+
+        window.closeAuthModal = function() {
+            document.getElementById('authModal').classList.add('hidden');
+        };
+
+        window.updateSettings = function() {
+            const restVal = parseInt(document.getElementById('settingRestPause').value);
+            const vibVal = document.getElementById('settingVibrate').checked;
+            const soundVal = document.getElementById('settingSound').checked;
+
+            window.userState.settings.restPause = restVal;
+            window.userState.settings.vibration = vibVal;
+            window.userState.settings.sound = soundVal;
+
+            saveUserDataLocally();
+            renderUI();
+        };
+
+        window.toggleAudio = function() {
+            window.userState.settings.sound = !window.userState.settings.sound;
+            document.getElementById('settingSound').checked = window.userState.settings.sound;
+            saveUserDataLocally();
+            if (window.userState.settings.sound) playBeep(600, 'sine', 0.15);
+            refreshQuickControls();
+        };
+
+        window.exportData = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.userState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `kegel_fit_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        };
+
+        // Učitavanje rezervne kopije (JSON) uz provjeru ispravnosti podataka
+        window.importData = function(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const raw = JSON.parse(reader.result);
+                    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('format');
+
+                    const isDay = n => Number.isInteger(n) && n >= 1 && n <= 7;
+                    const def = window.userState;
+                    const allowedRest = [5, 10, 15, 20, 30];
+
+                    const rs = raw.settings || {};
+                    const clean = {
+                        selectedDay: isDay(raw.selectedDay) ? raw.selectedDay : 1,
+                        completedDays: Array.isArray(raw.completedDays)
+                            ? [...new Set(raw.completedDays.filter(isDay))] : [],
+                        streak: Number.isFinite(raw.streak) && raw.streak >= 0 ? Math.floor(raw.streak) : 0,
+                        lastWorkoutDate: typeof raw.lastWorkoutDate === 'string' ? raw.lastWorkoutDate : null,
+                        settings: {
+                            restPause: allowedRest.includes(rs.restPause) ? rs.restPause : def.settings.restPause,
+                            vibration: typeof rs.vibration === 'boolean' ? rs.vibration : def.settings.vibration,
+                            sound: typeof rs.sound === 'boolean' ? rs.sound : def.settings.sound
+                        },
+                        history: Array.isArray(raw.history)
+                            ? raw.history
+                                .filter(h => h && typeof h.date === 'string' && isDay(h.dayNumber))
+                                .map(h => ({
+                                    date: h.date.slice(0, 10),
+                                    dayNumber: h.dayNumber,
+                                    durationSeconds: Number.isFinite(h.durationSeconds) && h.durationSeconds >= 0 ? Math.round(h.durationSeconds) : 0
+                                }))
+                            : []
+                    };
+
+                    const looksValid = ['selectedDay', 'completedDays', 'streak', 'history', 'settings'].some(k => k in raw);
+                    if (!looksValid) throw new Error('format');
+
+                    const msg = `Učitati rezervnu kopiju?\n\nTreninga u istoriji: ${clean.history.length}\nZavršenih dana: ${clean.completedDays.length}\nNiz: ${clean.streak}\n\nTrenutni podaci će biti zamijenjeni.`;
+                    if (!confirm(msg)) return;
+
+                    window.userState = clean;
+                    saveUserDataLocally();
+                    renderUI();
+                    alert('Rezervna kopija je uspješno učitana.');
+                } catch (e) {
+                    alert('Datoteka nije ispravna rezervna kopija Kegel Fit aplikacije.');
+                } finally {
+                    input.value = '';
+                }
+            };
+            reader.onerror = function() {
+                alert('Čitanje datoteke nije uspjelo.');
+                input.value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        window.resetAllData = function() {
+            if (confirm("Da li ste sigurni da želite da obrišete svu lokalnu istoriju vežbi?")) {
+                localStorage.removeItem('kegel_fit_state');
+                window.userState = {
+                    selectedDay: 1,
+                    completedDays: [],
+                    streak: 0,
+                    lastWorkoutDate: null,
+                    settings: { restPause: 15, vibration: true, sound: true },
+                    history: []
+                };
+                renderUI();
+            }
+        };
+    </script>
+</body>
+</html>
