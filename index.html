@@ -767,10 +767,30 @@
         // Haptic feedback
         function triggerHaptic(type) {
             if (!userState.settings.vibration || !('vibrate' in navigator)) return;
-            if (type === 'tense') navigator.vibrate([100, 50, 100]);
-            else if (type === 'relax') navigator.vibrate(150);
-            else if (type === 'pulse') navigator.vibrate(60);
+            if (type === 'pulse') navigator.vibrate(60);
         }
+
+        // Vibracija radi neprekidno dok je faza STISNI aktivna, a staje na OPUSTI / odmor / pauzu.
+        // Šalje se u kratkim komadima (1.3 s) koji se obnavljaju svake sekunde: tako nema
+        // praznog hoda, a ako se tajmer zaustavi (npr. zaključan ekran), vibracija sama prestane.
+        let hapticActive = false;
+        function syncHaptic() {
+            if (!('vibrate' in navigator)) return;
+            const we = workoutEngine;
+            const shouldVibrate = !!(window.userState.settings.vibration && we.active && !we.paused && we.phase === 'tense');
+            if (shouldVibrate) {
+                navigator.vibrate(1300);
+                hapticActive = true;
+            } else if (hapticActive) {
+                navigator.vibrate(0);
+                hapticActive = false;
+            }
+        }
+        function stopHaptic() {
+            if ('vibrate' in navigator && hapticActive) navigator.vibrate(0);
+            hapticActive = false;
+        }
+        document.addEventListener('visibilitychange', () => { if (document.hidden) stopHaptic(); });
 
         // --- INITIALIZATION ---
         window.onload = function() {
@@ -1084,6 +1104,7 @@
             workoutEngine.lastTick = performance.now();
             workoutEngine.frozen = 0;
             updateWorkoutScreenUI();
+            syncHaptic();
             cancelAnimationFrame(ringRaf);
             ringRaf = requestAnimationFrame(ringFrame);
 
@@ -1097,6 +1118,7 @@
                 if (workoutEngine.timerSeconds <= 0) {
                     advanceWorkoutPhase();
                 }
+                syncHaptic();
             }, 1000);
         }
 
@@ -1107,13 +1129,11 @@
                 workoutEngine.phase = 'tense';
                 workoutEngine.timerSeconds = currentBlock.tense;
                 playBeep(600, 'sine', 0.2);
-                triggerHaptic('tense');
             } 
             else if (workoutEngine.phase === 'tense') {
                 workoutEngine.phase = 'relax';
                 workoutEngine.timerSeconds = currentBlock.relax;
                 playBeep(400, 'sine', 0.15);
-                triggerHaptic('relax');
             } 
             else if (workoutEngine.phase === 'relax') {
                 if (workoutEngine.repIndex < currentBlock.count) {
@@ -1121,8 +1141,7 @@
                     workoutEngine.phase = 'tense';
                     workoutEngine.timerSeconds = currentBlock.tense;
                     playBeep(600, 'sine', 0.2);
-                    triggerHaptic('tense');
-                } else {
+                    } else {
                     // Block completed
                     if (workoutEngine.blockIndex < workoutEngine.dayData.blocks.length - 1) {
                         workoutEngine.phase = 'rest';
@@ -1142,7 +1161,6 @@
                 const nextBlock = workoutEngine.dayData.blocks[workoutEngine.blockIndex];
                 workoutEngine.timerSeconds = nextBlock.tense;
                 playBeep(600, 'sine', 0.2);
-                triggerHaptic('tense');
             }
 
             updateWorkoutScreenUI();
@@ -1212,6 +1230,7 @@
             } else {
                 workoutEngine.lastTick = performance.now() - workoutEngine.frozen * 1000;
             }
+            syncHaptic();
             refreshQuickControls();
         };
 
@@ -1229,7 +1248,9 @@
             window.userState.settings.vibration = !window.userState.settings.vibration;
             document.getElementById('settingVibrate').checked = window.userState.settings.vibration;
             saveUserDataLocally();
-            if (window.userState.settings.vibration) triggerHaptic('pulse');
+            if (workoutEngine.active && workoutEngine.phase === 'tense') syncHaptic();
+            else if (window.userState.settings.vibration) triggerHaptic('pulse');
+            if (!window.userState.settings.vibration) stopHaptic();
             refreshQuickControls();
         };
 
@@ -1239,6 +1260,7 @@
             document.getElementById('appHeader').classList.toggle('hidden', on);
             document.getElementById('mainNav').classList.toggle('hidden', on);
             document.body.style.overflow = on ? 'hidden' : '';
+            if (!on) stopHaptic();
             if (!on) document.getElementById('helpPanel').classList.add('hidden');
         }
 
@@ -1278,7 +1300,6 @@
                 workoutEngine.phase = 'tense';
                 workoutEngine.timerSeconds = blocks[workoutEngine.blockIndex].tense;
                 playBeep(600, 'sine', 0.2);
-                triggerHaptic('tense');
             } else if (workoutEngine.blockIndex < blocks.length - 1) {
                 // iz vježbe (ili pripreme) na odmor
                 workoutEngine.phase = 'rest';
