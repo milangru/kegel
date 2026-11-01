@@ -1,7 +1,7 @@
 // Kegel Fit service worker: omogućava rad bez interneta.
 // Kad izmeniš index.html, ne moraš ništa da diraš ovde (HTML se uvek prvo traži sa mreže).
 // Povećaj verziju samo ako menjaš spisak PRECACHE fajlova.
-const CACHE = 'kegel-fit-v1';
+const CACHE = 'kegel-fit-v2';
 
 const LOCAL = [
   './',
@@ -46,10 +46,16 @@ self.addEventListener('install', event => {
     const cache = await caches.open(CACHE);
     // Svaki fajl posebno: ako jedan ne uspe, ostali se svejedno keširaju
     await Promise.all([...LOCAL, ...CDN].map(async url => {
+      let res = null;
       try {
-        const res = await fetch(url, { cache: 'reload' });
-        if (res && res.ok) await cache.put(url, res);
-      } catch (e) { /* nastavi */ }
+        res = await fetch(url, { cache: 'reload' });
+      } catch (e) {
+        // Neki CDN-ovi (npr. Tailwind) ne šalju CORS zaglavlje; za <script>/<link> je dovoljan i no-cors
+        try { res = await fetch(url, { mode: 'no-cors', cache: 'reload' }); } catch (e2) { res = null; }
+      }
+      if (res && (res.ok || res.type === 'opaque')) {
+        try { await cache.put(url, res); } catch (e) { /* nastavi */ }
+      }
     }));
     await self.skipWaiting();
   })());
