@@ -1711,8 +1711,65 @@
             refreshQuickControls();
         };
 
+        // --- Screen Wake Lock (ekran se ne gasi tokom vježbe) + pravi fullscreen ---
+        let wakeLockSentinel = null;
+
+        async function acquireWakeLock() {
+            if (!('wakeLock' in navigator) || wakeLockSentinel) return;
+            try {
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+            } catch (e) { wakeLockSentinel = null; }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLockSentinel) {
+                wakeLockSentinel.release().catch(() => {});
+                wakeLockSentinel = null;
+            }
+        }
+
+        function enterFullscreen() {
+            const el = document.documentElement;
+            const req = el.requestFullscreen || el.webkitRequestFullscreen;
+            if (req && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                try {
+                    const r = req.call(el, { navigationUI: 'hide' });
+                    if (r && r.catch) r.catch(() => {});
+                } catch (e) {}
+            }
+        }
+
+        function exitFullscreen() {
+            const ex = document.exitFullscreen || document.webkitExitFullscreen;
+            if (ex && (document.fullscreenElement || document.webkitFullscreenElement)) {
+                try {
+                    const r = ex.call(document);
+                    if (r && r.catch) r.catch(() => {});
+                } catch (e) {}
+            }
+        }
+
+        // Auto-pauza: poziv, drugi app, zaključan ekran, prebacivanje taba...
+        // Vježba ostaje pauzirana dok korisnik sam ne pritisne play.
+        function autoPauseWorkout() {
+            if (workoutEngine.active && !workoutEngine.paused) {
+                window.pauseWorkout();
+            }
+        }
+
+        // Browser pušta wake lock kad se tab sakrije; ponovo ga uzmi kad se korisnik vrati
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) autoPauseWorkout();
+            else if (workoutEngine.active) acquireWakeLock();
+        });
+        window.addEventListener('pagehide', autoPauseWorkout);
+        document.addEventListener('freeze', autoPauseWorkout);
+
         // Fullscreen ekran vježbanja preko svega (zaglavlje i meni se ne vide)
         function setWorkoutMode(on) {
+            if (on) { enterFullscreen(); acquireWakeLock(); }
+            else { releaseWakeLock(); exitFullscreen(); }
             document.getElementById('workoutScreen').classList.toggle('hidden', !on);
             document.getElementById('appHeader').classList.toggle('hidden', on);
             document.getElementById('mainNav').classList.toggle('hidden', on);
