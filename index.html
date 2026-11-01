@@ -21,6 +21,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kegel Fit - Dnevni Trening Za Karlično Dno</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="shortcut icon" href="favicon/favicon.ico">
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -174,14 +179,14 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide text-white whitespace-nowrap" id="appLogoTitle">Kegel Fit</h1>
-                    <p class="hidden sm:block text-xs text-gray-400">Jačanje karličnog dna</p>
+                    <p class="hidden sm:block text-xs text-gray-400" data-i18n="app.tagline">Jačanje karličnog dna</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- User Profile / Auth Status Button -->
                 <button id="authBtn" onclick="openAuthModal()" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs sm:text-sm font-medium whitespace-nowrap transition duration-200">
-                    <img id="userAvatar" src="https://placehold.co/100x100/10b981/ffffff?text=U" alt="Korisnik" class="w-6 h-6 rounded-full hidden">
+                    <img id="userAvatar" src="https://placehold.co/100x100/10b981/ffffff?text=U" alt="Korisnik" data-i18n-alt="auth.user" class="w-6 h-6 rounded-full hidden">
                     <i id="userIcon" class="fa-solid fa-user text-brand-400"></i>
                     <span id="userName" class="max-w-[90px] sm:max-w-[130px] truncate">Prijava</span>
                 </button>
@@ -209,7 +214,7 @@
                             <i class="fa-solid fa-fire text-amber-500"></i> <span id="streakBadgeText">Niz: 0 Dana</span>
                         </div>
                         <h2 class="text-2xl font-bold text-white" id="currentDayTitle">Dan 1: Uvodni Trening</h2>
-                        <p class="text-sm text-gray-400 mt-1 max-w-md">Kombinacija sporih kontrakcija za stabilnost i brzih pulseva za reakciju mišića.</p>
+                        <p class="text-sm text-gray-400 mt-1 max-w-md" data-i18n="home.banner">Kombinacija sporih kontrakcija za stabilnost i brzih pulseva za reakciju mišića.</p>
                     </div>
                     
                     <button onclick="startWorkout()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-500 text-white font-bold text-base shadow-lg shadow-brand-500/25 transition hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
@@ -222,7 +227,7 @@
             <!-- Nedelje (horizontalno) + dani izabrane nedelje -->
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400">Nedelje</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400" data-i18n="weeks.title">Nedelje</h3>
                     <span class="text-xs text-brand-400" id="totalProgressText">0 od 175 dana</span>
                 </div>
                 <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none" id="weeksListContainer">
@@ -243,9 +248,9 @@
                 <div class="flex items-center justify-between border-b border-brand-border pb-3">
                     <div>
                         <h3 class="font-semibold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-brand-400"></i> Struktura današnjeg treninga
+                            <i class="fa-solid fa-list-check text-brand-400"></i> <span data-i18n="home.structure">Struktura današnjeg treninga</span>
                         </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">Slobodno disanje tokom celog treninga (Free breathing)</p>
+                        <p class="text-xs text-gray-400 mt-0.5" data-i18n="home.breathing">Slobodno disanje tokom celog treninga</p>
                     </div>
                     <span class="text-xs font-mono bg-brand-border text-gray-300 px-2.5 py-1 rounded-md" id="totalEstimatedTime">~3 min</span>
                 </div>
@@ -259,7 +264,7 @@
                 <div class="p-3.5 rounded-xl bg-brand-500/5 border border-brand-500/15 flex items-start gap-3">
                     <i class="fa-solid fa-lightbulb text-amber-400 text-lg mt-0.5"></i>
                     <p class="text-xs text-gray-300 leading-relaxed">
-                        <strong>Kako vežbati:</strong> Vežbajte sedeći, stojeći ili ležeći. Ne zadržavajte dah i ne stežite mišiće stomaka ili zadnjice. Telefon vibrira dok traje stezanje (STISNI), a staje čim počne opuštanje.
+                        <strong data-i18n="tip.title">Kako vežbati:</strong> <span data-i18n="tip.body">Vežbajte sedeći, stojeći ili ležeći.</span>
                     </p>
                 </div>
             </div>
@@ -268,54 +273,68 @@
 
         <!-- TAB 3: STATISTIKA I ISTORIJA -->
         <section id="tab-stats" class="hidden space-y-6">
-            <h2 class="text-xl font-bold text-white">Statistika i Napredak</h2>
+            <h2 class="text-xl font-bold text-white" data-i18n="stats.title">Statistika i napredak</h2>
 
             <!-- Cards Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div class="glass-card p-4 rounded-xl border border-brand-border text-center">
                     <i class="fa-solid fa-fire text-2xl text-amber-500 mb-1"></i>
                     <h4 class="text-2xl font-bold text-white" id="statStreak">0</h4>
-                    <p class="text-xs text-gray-400">Trenutni Niz (Dana)</p>
+                    <p class="text-xs text-gray-400" data-i18n="stats.streak">Trenutni niz (dana)</p>
                 </div>
                 <div class="glass-card p-4 rounded-xl border border-brand-border text-center">
                     <i class="fa-solid fa-circle-check text-2xl text-brand-400 mb-1"></i>
                     <h4 class="text-2xl font-bold text-white" id="statCompleted">0</h4>
-                    <p class="text-xs text-gray-400">Odrađenih Treninga</p>
+                    <p class="text-xs text-gray-400" data-i18n="stats.completed">Odrađenih treninga</p>
                 </div>
                 <div class="glass-card p-4 rounded-xl border border-brand-border text-center col-span-2 sm:col-span-1">
                     <i class="fa-solid fa-stopwatch text-2xl text-blue-400 mb-1"></i>
                     <h4 class="text-2xl font-bold text-white" id="statTime">0m</h4>
-                    <p class="text-xs text-gray-400">Ukupno Vreme</p>
+                    <p class="text-xs text-gray-400" data-i18n="stats.time">Ukupno vreme</p>
                 </div>
             </div>
 
             <!-- Workout History List -->
             <div class="glass-card rounded-2xl p-5 border border-brand-border space-y-3">
-                <h3 class="font-semibold text-white">Istorija Treninga</h3>
+                <h3 class="font-semibold text-white" data-i18n="stats.history">Istorija treninga</h3>
                 <div class="divide-y divide-brand-border" id="historyListContainer">
-                    <p class="text-xs text-gray-500 py-4 text-center">Još uvek nema zabeleženih treninga.</p>
+                    <p class="text-xs text-gray-500 py-4 text-center" data-i18n="stats.empty">Još uvek nema zabeleženih treninga.</p>
                 </div>
             </div>
         </section>
 
         <!-- TAB 4: PODEŠAVANJA (SETTINGS) -->
         <section id="tab-settings" class="hidden space-y-6">
-            <h2 class="text-xl font-bold text-white">Podešavanja Aplikacije</h2>
+            <h2 class="text-xl font-bold text-white" data-i18n="settings.title">Podešavanja aplikacije</h2>
 
             <div class="glass-card rounded-2xl p-5 border border-brand-border space-y-5">
                 
+                <!-- Language setting -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold text-white" data-i18n="set.lang">Jezik</h4>
+                        <p class="text-xs text-gray-400" data-i18n="set.lang.desc">Jezik interfejsa aplikacije</p>
+                    </div>
+                    <select id="settingLang" onchange="setLanguage(this.value)" class="bg-brand-dark border border-brand-border text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-500">
+                        <option value="sr">Srpski</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <hr class="border-brand-border">
+
                 <!-- Pause duration setting -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Pauza Između Blokova</h4>
-                        <p class="text-xs text-gray-400">Trajanje odmora u sekundama (Podrazumevano: 15s)</p>
+                        <h4 class="text-sm font-semibold text-white" data-i18n="set.rest">Pauza između blokova</h4>
+                        <p class="text-xs text-gray-400" data-i18n="set.rest.desc">Trajanje odmora u sekundama (podrazumevano: 15 s)</p>
                     </div>
                     <select id="settingRestPause" onchange="updateSettings()" class="bg-brand-dark border border-brand-border text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-500">
-                        <option value="5">5 sekundi</option>
-                        <option value="10">10 sekundi</option>
-                        <option value="15" selected>15 sekundi</option>
-                        <option value="20">20 sekundi</option>
-                        <option value="30">30 sekundi</option>
+                        <option value="5" data-sec="5">5 sekundi</option>
+                        <option value="10" data-sec="10">10 sekundi</option>
+                        <option value="15" data-sec="15" selected>15 sekundi</option>
+                        <option value="20" data-sec="20">20 sekundi</option>
+                        <option value="30" data-sec="30">30 sekundi</option>
                     </select>
                 </div>
 
@@ -324,8 +343,8 @@
                 <!-- Vibration setting -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Vibracija (Haptika)</h4>
-                        <p class="text-xs text-gray-400">Vibracioni signali za stiskanje i opuštanje</p>
+                        <h4 class="text-sm font-semibold text-white" data-i18n="set.vib">Vibracija (haptika)</h4>
+                        <p class="text-xs text-gray-400" data-i18n="set.vib.desc">Vibrira dok traje stezanje, staje na opuštanju</p>
                     </div>
                     <input type="checkbox" id="settingVibrate" onchange="updateSettings()" checked class="w-5 h-5 accent-brand-500 cursor-pointer">
                 </div>
@@ -335,8 +354,8 @@
                 <!-- Audio guidance -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Zvučni Signali</h4>
-                        <p class="text-xs text-gray-400">Kratki tonovi pri promeni ciklusa</p>
+                        <h4 class="text-sm font-semibold text-white" data-i18n="set.sound">Zvučni signali</h4>
+                        <p class="text-xs text-gray-400" data-i18n="set.sound.desc">Kratki tonovi pri promeni ciklusa</p>
                     </div>
                     <input type="checkbox" id="settingSound" onchange="updateSettings()" checked class="w-5 h-5 accent-brand-500 cursor-pointer">
                 </div>
@@ -346,10 +365,10 @@
                 <!-- Cloud Sync info -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="text-sm font-semibold text-white">Sinhronizacija Sa Oblakom</h4>
-                        <p class="text-xs text-gray-400" id="cloudSyncStatusText">Korisnik nije prijavljen (lokalni režim)</p>
+                        <h4 class="text-sm font-semibold text-white" data-i18n="set.cloud">Sinhronizacija sa oblakom</h4>
+                        <p class="text-xs text-gray-400" id="cloudSyncStatusText" data-i18n="auth.status.local">Korisnik nije prijavljen (lokalni režim)</p>
                     </div>
-                    <button onclick="openAuthModal()" class="px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold hover:bg-brand-500/20">
+                    <button onclick="openAuthModal()" class="px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold hover:bg-brand-500/20" data-i18n="set.manage">
                         Upravljaj
                     </button>
                 </div>
@@ -358,17 +377,17 @@
 
             <!-- Danger Zone / Data Reset -->
             <div class="glass-card rounded-2xl p-5 border border-red-500/20 space-y-3">
-                <h4 class="text-sm font-semibold text-red-400">Upravljanje Podacima</h4>
+                <h4 class="text-sm font-semibold text-red-400" data-i18n="set.data">Upravljanje podacima</h4>
                 <div class="flex flex-wrap gap-3">
                     <button onclick="exportData()" class="px-3.5 py-2 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs font-medium text-gray-300">
-                        <i class="fa-solid fa-download mr-1"></i> Preuzmi Rezervnu Kopiju (JSON)
+                        <i class="fa-solid fa-download mr-1"></i> <span data-i18n="data.export">Preuzmi rezervnu kopiju (JSON)</span>
                     </button>
                     <button onclick="document.getElementById('importFileInput').click()" class="px-3.5 py-2 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs font-medium text-gray-300">
-                        <i class="fa-solid fa-upload mr-1"></i> Učitaj Rezervnu Kopiju (JSON)
+                        <i class="fa-solid fa-upload mr-1"></i> <span data-i18n="data.import">Učitaj rezervnu kopiju (JSON)</span>
                     </button>
                     <input type="file" id="importFileInput" accept="application/json,.json" class="hidden" onchange="importData(event)">
                     <button onclick="resetAllData()" class="px-3.5 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-medium text-red-400">
-                        <i class="fa-solid fa-trash mr-1"></i> Obriši Lokalnu Istoriju
+                        <i class="fa-solid fa-trash mr-1"></i> <span data-i18n="data.reset">Obriši lokalnu istoriju</span>
                     </button>
                 </div>
             </div>
@@ -381,15 +400,15 @@
         <div class="max-w-md mx-auto flex justify-around items-center">
             <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 p-2 text-brand-400">
                 <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-medium">Trening</span>
+                <span class="text-[10px] font-medium" data-i18n="nav.workout">Trening</span>
             </button>
             <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white">
                 <i class="fa-solid fa-chart-line text-lg"></i>
-                <span class="text-[10px] font-medium">Statistika</span>
+                <span class="text-[10px] font-medium" data-i18n="nav.stats">Statistika</span>
             </button>
             <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white">
                 <i class="fa-solid fa-sliders text-lg"></i>
-                <span class="text-[10px] font-medium">Podešavanja</span>
+                <span class="text-[10px] font-medium" data-i18n="nav.settings">Podešavanja</span>
             </button>
         </div>
     </nav>
@@ -399,9 +418,9 @@
 
         <!-- Top card: naziv vježbe -->
         <div class="wk-card wk-top">
-            <button onclick="toggleHelp()" aria-label="Pomoć" class="wk-round l"><i class="fa-solid fa-question"></i></button>
-            <button onclick="abortWorkout()" aria-label="Odustani" class="wk-round r"><i class="fa-solid fa-xmark"></i></button>
-            <small>Vježba</small>
+            <button onclick="toggleHelp()" aria-label="Pomoć" data-i18n-aria="aria.help" class="wk-round l"><i class="fa-solid fa-question"></i></button>
+            <button onclick="abortWorkout()" aria-label="Odustani" data-i18n-aria="aria.abort" class="wk-round r"><i class="fa-solid fa-xmark"></i></button>
+            <small data-i18n="wk.exercise">Vežba</small>
             <div id="wnExerciseName" class="wk-name">Tension (Sporo)</div>
         </div>
 
@@ -415,13 +434,13 @@
                 <div class="wk-ringin">
                     <div class="wk-grp">
                         <div id="tenseTab" class="wk-box wk-tab t">3 s</div>
-                        <div id="tenseBox" class="wk-box wk-bx">Stisni</div>
+                        <div id="tenseBox" class="wk-box wk-bx" data-i18n="wk.tense">Stisni</div>
                     </div>
 
                     <span id="workoutTimerDisplay" class="wk-num">3</span>
 
                     <div class="wk-grp">
-                        <div id="relaxBox" class="wk-box wk-bx">Opusti</div>
+                        <div id="relaxBox" class="wk-box wk-bx" data-i18n="wk.relax">Opusti</div>
                         <div id="relaxTab" class="wk-box wk-tab b">3 s</div>
                     </div>
                 </div>
@@ -431,26 +450,26 @@
         <!-- Brze komande -->
         <div class="wk-ctrl">
             <div>
-                <button onclick="toggleStealth()" id="stealthBtn" class="wk-btn" aria-label="Stealth"></button>
-                <button onclick="toggleAudio()" id="audioToggleBtn" class="wk-btn" aria-label="Zvuk"></button>
+                <button onclick="toggleStealth()" id="stealthBtn" class="wk-btn" aria-label="Stealth" data-i18n-aria="aria.stealth"></button>
+                <button onclick="toggleAudio()" id="audioToggleBtn" class="wk-btn" aria-label="Zvuk" data-i18n-aria="aria.sound"></button>
                 <button onclick="pauseWorkout()" id="pauseBtn" class="wk-pause" aria-label="Pauza"></button>
-                <button onclick="toggleVibration()" id="vibBtn" class="wk-btn" aria-label="Vibracija"></button>
-                <button onclick="skipBlock()" id="skipBtn" class="wk-btn" aria-label="Preskoči"><i class="fa-solid fa-arrow-right"></i></button>
+                <button onclick="toggleVibration()" id="vibBtn" class="wk-btn" aria-label="Vibracija" data-i18n-aria="aria.vibration"></button>
+                <button onclick="skipBlock()" id="skipBtn" class="wk-btn" aria-label="Preskoči" data-i18n-aria="aria.skip"><i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </div>
 
         <!-- Donja traka: koja vježba po redu + preostalo vrijeme -->
         <div class="wk-card wk-bottom">
-            <div class="wk-stat"><b id="wnExerciseNum">1/5</b><span>Vježbe</span></div>
-            <div class="wk-stat"><b id="overallTimerDisplay" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace">00:00</b><span>Preostalo</span></div>
+            <div class="wk-stat"><b id="wnExerciseNum">1/5</b><span data-i18n="wk.exercises">Vežbe</span></div>
+            <div class="wk-stat"><b id="overallTimerDisplay" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace">00:00</b><span data-i18n="wk.left">Preostalo</span></div>
         </div>
 
         <!-- Pomoć -->
         <div id="helpPanel" onclick="toggleHelp()" class="hidden absolute inset-0 bg-black/85 flex items-center justify-center p-6 z-10">
             <div class="wk-card rounded-2xl p-5 max-w-sm text-gray-200 leading-relaxed space-y-2" style="font-size:1.05em">
-                <p><strong class="text-white">Kako vježbati:</strong> sjedite, stojte ili ležite. Ne zadržavajte dah i ne stežite stomak ili zadnjicu.</p>
-                <p>Slobodno dišite tokom cijelog treninga. Telefon zatreperi pri svakoj promjeni ritma.</p>
-                <p class="text-gray-400" style="font-size:.85em">Dodirnite bilo gdje da zatvorite.</p>
+                <p><strong class="text-white" data-i18n="help.how">Kako vežbati:</strong> <span data-i18n="help.p1">sedite, stojte ili ležite.</span></p>
+                <p data-i18n="help.p2">Slobodno dišite tokom celog treninga.</p>
+                <p class="text-gray-400" style="font-size:.85em" data-i18n="help.close">Dodirnite bilo gde da zatvorite.</p>
             </div>
         </div>
     </div>
@@ -466,9 +485,9 @@
                 <i class="fa-solid fa-cloud"></i>
             </div>
 
-            <h3 class="text-xl font-bold text-white">Sinhronizacija Nalozi</h3>
-            <p class="text-xs text-gray-400 leading-relaxed">
-                Prijavite se putem Google nalozi da biste sačuvali sve vežbe, istoriju i nizove u bazi podataka. Vaš napredak biće dostupan na svim uređajima!
+            <h3 class="text-xl font-bold text-white" data-i18n="auth.modal.title">Sinhronizacija naloga</h3>
+            <p class="text-xs text-gray-400 leading-relaxed" data-i18n="auth.modal.desc">
+                Prijavite se Google nalogom da biste sačuvali vežbe, istoriju i nizove u bazi podataka.
             </p>
 
             <div id="authModalActionContainer" class="pt-2">
@@ -480,11 +499,11 @@
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    <span>Prijavi se sa Google-om</span>
+                    <span data-i18n="auth.google">Prijavi se preko Google-a</span>
                 </button>
             </div>
 
-            <p class="text-[10px] text-gray-500">Podaci se čuvaju u bezbednoj Firebase Firestore bazi.</p>
+            <p class="text-[10px] text-gray-500" data-i18n="auth.footer">Podaci se čuvaju u bezbednoj Firebase Firestore bazi.</p>
         </div>
     </div>
 
@@ -494,22 +513,22 @@
             <div class="w-16 h-16 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-3xl mx-auto animate-bounce">
                 <i class="fa-solid fa-trophy"></i>
             </div>
-            <h3 class="text-2xl font-black text-white">Čestitamo!</h3>
-            <p class="text-sm text-gray-300">Uspešno ste odradili današnji trening karličnog dna.</p>
+            <h3 class="text-2xl font-black text-white" data-i18n="success.title">Čestitamo!</h3>
+            <p class="text-sm text-gray-300" data-i18n="success.text">Uspešno ste odradili današnji trening karličnog dna.</p>
             
             <div class="p-3 bg-brand-card rounded-xl border border-brand-border flex justify-around text-xs">
                 <div>
-                    <span class="block text-gray-400">Ukupno blokova</span>
+                    <span class="block text-gray-400" data-i18n="success.blocks">Ukupno blokova</span>
                     <strong class="text-white text-sm" id="completedBlocksCount">5/5</strong>
                 </div>
                 <div>
-                    <span class="block text-gray-400">Niz Dana</span>
+                    <span class="block text-gray-400" data-i18n="success.streak">Niz dana</span>
                     <strong class="text-amber-400 text-sm" id="modalStreakCount">1</strong>
                 </div>
             </div>
 
-            <button onclick="closeSuccessModal()" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/30">
-                Sjajno, Nastavi
+            <button onclick="closeSuccessModal()" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/30" data-i18n="success.ok">
+                Sjajno, nastavi
             </button>
         </div>
     </div>
@@ -582,17 +601,22 @@
             };
         }
 
-        const AUTH_ERRORS = {
-            'auth/popup-closed-by-user': null,
-            'auth/cancelled-popup-request': null,
-            'auth/popup-blocked': 'Pregledač je blokirao prozor za prijavu. Dozvolite iskačuće prozore za ovu stranicu i pokušajte ponovo.',
-            'auth/unauthorized-domain': 'Ova adresa nije dozvoljena u Firebase-u. Dodajte domen (npr. localhost ili vaš GitHub Pages domen) u Authentication -> Settings -> Authorized domains.',
-            'auth/operation-not-allowed': 'Google prijava nije uključena. Uključite je u Firebase konzoli: Authentication -> Sign-in method -> Google.',
-            'auth/operation-not-supported-in-this-environment': 'Prijava ne radi kad je stranica otvorena kao fajl (file://). Otvorite je preko http(s) adrese, npr. komandom "python3 -m http.server 8080" pa http://localhost:8080.',
-            'auth/network-request-failed': 'Nema veze sa internetom. Proverite konekciju i pokušajte ponovo.',
-            'auth/invalid-api-key': 'Neispravan Firebase API ključ. Proverite FIREBASE_CONFIG u skripti.',
-            'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Neispravan Firebase API ključ. Proverite FIREBASE_CONFIG u skripti.'
-        };
+        // Poruke o greškama pri prijavi (null = tiho ignoriši, npr. korisnik je zatvorio prozor)
+        function authErrorText(code, message) {
+            const map = {
+                'auth/popup-closed-by-user': null,
+                'auth/cancelled-popup-request': null,
+                'auth/popup-blocked': 'auth.err.popup_blocked',
+                'auth/unauthorized-domain': 'auth.err.unauthorized_domain',
+                'auth/operation-not-allowed': 'auth.err.operation_not_allowed',
+                'auth/operation-not-supported-in-this-environment': 'auth.err.file_protocol',
+                'auth/network-request-failed': 'auth.err.network',
+                'auth/invalid-api-key': 'auth.err.invalid_key',
+                'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'auth.err.invalid_key'
+            };
+            if (code in map) return map[code] ? window.t(map[code]) : null;
+            return window.t('auth.err.generic', { msg: message || code });
+        }
 
         // Inicijalizacija Firebase-a
         if (firebaseConfigured) {
@@ -616,11 +640,11 @@
         // Prijava preko Google naloga
         window.handleGoogleSignIn = async function() {
             if (!firebaseConfigured || !auth) {
-                alert('Cloud prijava nije podešena. U skripti unesite svoju FIREBASE_CONFIG (uputstvo je u README.md).');
+                alert(window.t('auth.err.notconfigured'));
                 return;
             }
             if (location.protocol === 'file:') {
-                alert(AUTH_ERRORS['auth/operation-not-supported-in-this-environment']);
+                alert(window.t('auth.err.file_protocol'));
                 return;
             }
             try {
@@ -628,8 +652,8 @@
                 closeAuthModal();      // dalje preuzima onAuthStateChanged
             } catch (error) {
                 console.error("Google Auth error:", error);
-                const known = error.code in AUTH_ERRORS ? AUTH_ERRORS[error.code] : 'Prijava nije uspela: ' + (error.message || error.code);
-                if (known) alert(known);
+                const text = authErrorText(error.code, error.message);
+                if (text) alert(text);
             }
         };
 
@@ -647,7 +671,7 @@
             if (syncPromise) return syncPromise;
             syncPromise = (async () => {
                 if (!currentUser || !db) return;
-                setCloudStatus('Sinhronizacija...');
+                setCloudStatus(window.t('auth.status.syncing'));
                 try {
                     const ref = userDocRef(currentUser.uid);
                     const snap = await getDoc(ref);
@@ -655,12 +679,11 @@
                     cloudReady = true;
                     window.saveUserDataLocally();     // upisuje lokalno i šalje spojeno stanje u oblak
                     window.renderUI();
-                    setCloudStatus(`Prijavljen kao: ${currentUser.email || currentUser.displayName} · sinhronizovano`);
+                    window.applyLanguage();
+                    setCloudStatus(window.t('auth.status.synced', { name: currentUser.email || currentUser.displayName }));
                 } catch (e) {
                     console.error("Firestore sync error:", e);
-                    setCloudStatus(e.code === 'permission-denied'
-                        ? 'Firestore pravila ne dozvoljavaju pristup. Proverite pravila (README).'
-                        : 'Sinhronizacija nije uspela. Podaci su sačuvani lokalno.');
+                    setCloudStatus(window.t(e.code === 'permission-denied' ? 'auth.err.sync.perm' : 'auth.err.sync.fail'));
                 }
             })().finally(() => { syncPromise = null; });
             return syncPromise;
@@ -673,9 +696,7 @@
                 await setDoc(userDocRef(currentUser.uid), window.userState);
             } catch (e) {
                 console.error("Firestore write error:", e);
-                setCloudStatus(e.code === 'permission-denied'
-                    ? 'Firestore pravila ne dozvoljavaju upis. Proverite pravila (README).'
-                    : 'Upis u oblak nije uspeo. Podaci su sačuvani lokalno.');
+                setCloudStatus(window.t(e.code === 'permission-denied' ? 'auth.err.write.perm' : 'auth.err.write.fail'));
             }
         };
 
@@ -686,37 +707,37 @@
             const modalActionEl = document.getElementById('authModalActionContainer');
 
             if (user) {
-                userNameEl.textContent = user.displayName || user.email || "Korisnik";
+                userNameEl.textContent = user.displayName || user.email || window.t('auth.user');
                 if (user.photoURL) {
                     userAvatarEl.src = user.photoURL;
                     userAvatarEl.classList.remove('hidden');
                     userIconEl.classList.add('hidden');
                 }
-                setCloudStatus(`Prijavljen kao: ${user.email || user.displayName}`);
+                setCloudStatus(window.t('auth.status.signedin', { name: user.email || user.displayName }));
 
                 modalActionEl.innerHTML = `
                     <div class="p-3 bg-brand-card rounded-xl mb-3 text-left">
-                        <span class="block text-xs text-gray-400">Prijavljen nalog</span>
-                        <strong class="text-sm text-white">${esc(user.displayName || 'Korisnik')}</strong>
+                        <span class="block text-xs text-gray-400">${esc(window.t('auth.account'))}</span>
+                        <strong class="text-sm text-white">${esc(user.displayName || window.t('auth.user'))}</strong>
                         <p class="text-xs text-gray-400 truncate">${esc(user.email)}</p>
                     </div>
                     <button onclick="handleSignOut()" class="w-full py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-sm font-semibold">
-                        Odjavi se
+                        ${esc(window.t('auth.signout'))}
                     </button>
                 `;
             } else {
-                userNameEl.textContent = "Prijava";
+                userNameEl.textContent = window.t('auth.signin');
                 userAvatarEl.classList.add('hidden');
                 userIconEl.classList.remove('hidden');
 
                 if (!firebaseConfigured) {
-                    setCloudStatus('Lokalni režim (cloud nije podešen)');
+                    setCloudStatus(window.t('auth.status.notconfigured'));
                     modalActionEl.innerHTML = `
-                        <p class="text-xs text-gray-400 leading-relaxed">Cloud sinhronizacija još nije podešena. Podaci se čuvaju lokalno u ovom pregledaču. Za prijavu unesite Firebase konfiguraciju u skriptu (uputstvo je u README.md).</p>
+                        <p class="text-xs text-gray-400 leading-relaxed">${esc(window.t('auth.notconfigured.text'))}</p>
                     `;
                     return;
                 }
-                setCloudStatus('Korisnik nije prijavljen (lokalni režim)');
+                setCloudStatus(window.t('auth.status.local'));
                 modalActionEl.innerHTML = `
                     <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-sm flex items-center justify-center gap-3 transition shadow-lg">
                         <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -725,11 +746,13 @@
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                         </svg>
-                        <span>Prijavi se sa Google-om</span>
+                        <span>${esc(window.t('auth.google'))}</span>
                     </button>
                 `;
             }
         }
+
+        window.refreshAuthUI = () => updateAuthUI(currentUser);
 
         // Početno stanje interfejsa
         updateAuthUI(null);
@@ -737,6 +760,281 @@
 
     <!-- CORE APPLICATION LOGIC -->
     <script>
+        // --- PREVODI (srpski latinica / engleski) ---
+        const I18N = {
+        sr: {
+            "app.title": "Kegel Fit - dnevni trening za karlično dno",
+            "app.tagline": "Jačanje karličnog dna",
+            "auth.user": "Korisnik",
+            "auth.signin": "Prijava",
+            "home.banner": "Kombinacija sporih kontrakcija za stabilnost i brzih pulseva za reakciju mišića.",
+            "home.start": "Započni trening",
+            "home.repeat": "Ponovi trening",
+            "streak.badge.one": "Niz: {n} dan",
+            "streak.badge.few": "Niz: {n} dana",
+            "streak.badge.other": "Niz: {n} dana",
+            "weeks.title": "Nedelje",
+            "weeks.week": "Nedelja",
+            "days.day": "Dan",
+            "progress.total": "{n} od {total} dana",
+            "week.plan": "Plan {week}. nedelje",
+            "week.progress": "{n} od 7 završenih",
+            "day.title": "Nedelja {week} · Dan {day}",
+            "home.structure": "Struktura današnjeg treninga",
+            "home.breathing": "Slobodno disanje tokom celog treninga",
+            "tip.title": "Kako vežbati:",
+            "tip.body": "Vežbajte sedeći, stojeći ili ležeći. Ne zadržavajte dah i ne stežite mišiće stomaka ili zadnjice. Telefon vibrira dok traje stezanje (STISNI), a staje čim počne opuštanje.",
+            "block.slow": "Sporo stezanje",
+            "block.fast": "Brzo stezanje",
+            "block.detail": "Stisni x {tense}s - Opusti x {relax}s",
+            "stats.title": "Statistika i napredak",
+            "stats.streak": "Trenutni niz (dana)",
+            "stats.completed": "Odrađenih treninga",
+            "stats.time": "Ukupno vreme",
+            "stats.history": "Istorija treninga",
+            "stats.empty": "Još uvek nema zabeleženih treninga.",
+            "history.done": "{title} završen",
+            "history.plus": "+1 trening",
+            "settings.title": "Podešavanja aplikacije",
+            "set.lang": "Jezik",
+            "set.lang.desc": "Jezik interfejsa aplikacije",
+            "set.rest": "Pauza između blokova",
+            "set.rest.desc": "Trajanje odmora u sekundama (podrazumevano: 15 s)",
+            "unit.seconds": "sekundi",
+            "set.vib": "Vibracija (haptika)",
+            "set.vib.desc": "Vibrira dok traje stezanje, staje na opuštanju",
+            "set.sound": "Zvučni signali",
+            "set.sound.desc": "Kratki tonovi pri promeni ciklusa",
+            "set.cloud": "Sinhronizacija sa oblakom",
+            "set.manage": "Upravljaj",
+            "set.data": "Upravljanje podacima",
+            "data.export": "Preuzmi rezervnu kopiju (JSON)",
+            "data.import": "Učitaj rezervnu kopiju (JSON)",
+            "data.reset": "Obriši lokalnu istoriju",
+            "nav.workout": "Trening",
+            "nav.stats": "Statistika",
+            "nav.settings": "Podešavanja",
+            "wk.exercise": "Vežba",
+            "wk.exercises": "Vežbe",
+            "wk.left": "Preostalo",
+            "wk.tense": "Stisni",
+            "wk.relax": "Opusti",
+            "wk.prepare": "Priprema",
+            "wk.rest": "Odmor",
+            "wk.rep": "Ponavljanje {n} od {total}",
+            "aria.help": "Pomoć",
+            "aria.abort": "Odustani",
+            "aria.stealth": "Diskretan prikaz",
+            "aria.sound": "Zvuk",
+            "aria.pause": "Pauza",
+            "aria.resume": "Nastavi",
+            "aria.vibration": "Vibracija",
+            "aria.skip": "Preskoči",
+            "help.how": "Kako vežbati:",
+            "help.p1": "sedite, stojte ili ležite. Ne zadržavajte dah i ne stežite stomak ili zadnjicu.",
+            "help.p2": "Slobodno dišite tokom celog treninga. Telefon vibrira dok stežete (STISNI), a staje na opuštanju.",
+            "help.close": "Dodirnite bilo gde da zatvorite.",
+            "auth.modal.title": "Sinhronizacija naloga",
+            "auth.modal.desc": "Prijavite se Google nalogom da biste sačuvali vežbe, istoriju i nizove u bazi podataka. Vaš napredak biće dostupan na svim uređajima.",
+            "auth.google": "Prijavi se preko Google-a",
+            "auth.footer": "Podaci se čuvaju u bezbednoj Firebase Firestore bazi.",
+            "auth.account": "Prijavljeni nalog",
+            "auth.signout": "Odjavi se",
+            "auth.notconfigured.text": "Cloud sinhronizacija još nije podešena. Podaci se čuvaju lokalno u ovom pregledaču. Za prijavu unesite Firebase konfiguraciju u skriptu (uputstvo je u README.md).",
+            "auth.status.local": "Korisnik nije prijavljen (lokalni režim)",
+            "auth.status.notconfigured": "Lokalni režim (cloud nije podešen)",
+            "auth.status.signedin": "Prijavljeni ste kao: {name}",
+            "auth.status.syncing": "Sinhronizacija...",
+            "auth.status.synced": "Prijavljeni ste kao: {name} · sinhronizovano",
+            "auth.err.sync.perm": "Firestore pravila ne dozvoljavaju pristup. Proverite pravila (README).",
+            "auth.err.sync.fail": "Sinhronizacija nije uspela. Podaci su sačuvani lokalno.",
+            "auth.err.write.perm": "Firestore pravila ne dozvoljavaju upis. Proverite pravila (README).",
+            "auth.err.write.fail": "Upis u oblak nije uspeo. Podaci su sačuvani lokalno.",
+            "auth.err.notconfigured": "Cloud prijava nije podešena. U skripti unesite svoju FIREBASE_CONFIG (uputstvo je u README.md).",
+            "auth.err.popup_blocked": "Pregledač je blokirao prozor za prijavu. Dozvolite iskačuće prozore za ovu stranicu i pokušajte ponovo.",
+            "auth.err.unauthorized_domain": "Ova adresa nije dozvoljena u Firebase-u. Dodajte domen (npr. localhost ili vaš GitHub Pages domen) u Authentication -> Settings -> Authorized domains.",
+            "auth.err.operation_not_allowed": "Google prijava nije uključena. Uključite je u Firebase konzoli: Authentication -> Sign-in method -> Google.",
+            "auth.err.file_protocol": "Prijava ne radi kad je stranica otvorena kao fajl (file://). Otvorite je preko http(s) adrese, npr. komandom \"python3 -m http.server 8080\", pa http://localhost:8080.",
+            "auth.err.network": "Nema veze sa internetom. Proverite konekciju i pokušajte ponovo.",
+            "auth.err.invalid_key": "Neispravan Firebase API ključ. Proverite FIREBASE_CONFIG u skripti.",
+            "auth.err.generic": "Prijava nije uspela: {msg}",
+            "success.title": "Čestitamo!",
+            "success.text": "Uspešno ste odradili današnji trening karličnog dna.",
+            "success.blocks": "Ukupno blokova",
+            "success.streak": "Niz dana",
+            "success.ok": "Sjajno, nastavi",
+            "skip.confirm": "Preskočiti poslednju vežbu i završiti trening?",
+            "import.confirm": "Učitati rezervnu kopiju?\n\nTreninga u istoriji: {history}\nZavršenih dana: {days}\nNiz: {streak}\n\nTrenutni podaci će biti zamenjeni.",
+            "import.ok": "Rezervna kopija je uspešno učitana.",
+            "import.bad": "Datoteka nije ispravna rezervna kopija Kegel Fit aplikacije.",
+            "import.readerr": "Čitanje datoteke nije uspelo.",
+            "reset.confirm": "Da li ste sigurni da želite da obrišete svu lokalnu istoriju vežbi?",
+        },
+        en: {
+            "app.title": "Kegel Fit - daily pelvic floor workout",
+            "app.tagline": "Pelvic floor training",
+            "auth.user": "User",
+            "auth.signin": "Sign in",
+            "home.banner": "A mix of slow contractions for stability and fast pulses for muscle reaction.",
+            "home.start": "Start workout",
+            "home.repeat": "Repeat workout",
+            "streak.badge.one": "Streak: {n} day",
+            "streak.badge.few": "Streak: {n} days",
+            "streak.badge.other": "Streak: {n} days",
+            "weeks.title": "Weeks",
+            "weeks.week": "Week",
+            "days.day": "Day",
+            "progress.total": "{n} of {total} days",
+            "week.plan": "Week {week} plan",
+            "week.progress": "{n} of 7 completed",
+            "day.title": "Week {week} · Day {day}",
+            "home.structure": "Today's workout structure",
+            "home.breathing": "Breathe freely throughout the workout",
+            "tip.title": "How to exercise:",
+            "tip.body": "You can exercise sitting, standing or lying down. Do not hold your breath and do not tighten your abdominal or glute muscles. Your phone vibrates while you tense (TENSE) and stops as soon as you relax.",
+            "block.slow": "Slow tension",
+            "block.fast": "Fast tension",
+            "block.detail": "Tense x {tense}s - Relax x {relax}s",
+            "stats.title": "Statistics and progress",
+            "stats.streak": "Current streak (days)",
+            "stats.completed": "Workouts completed",
+            "stats.time": "Total time",
+            "stats.history": "Workout history",
+            "stats.empty": "No workouts recorded yet.",
+            "history.done": "{title} completed",
+            "history.plus": "+1 workout",
+            "settings.title": "App settings",
+            "set.lang": "Language",
+            "set.lang.desc": "Interface language",
+            "set.rest": "Rest between blocks",
+            "set.rest.desc": "Rest length in seconds (default: 15 s)",
+            "unit.seconds": "seconds",
+            "set.vib": "Vibration (haptics)",
+            "set.vib.desc": "Vibrates while you tense, stops while you relax",
+            "set.sound": "Sound signals",
+            "set.sound.desc": "Short tones when the phase changes",
+            "set.cloud": "Cloud sync",
+            "set.manage": "Manage",
+            "set.data": "Data management",
+            "data.export": "Download backup (JSON)",
+            "data.import": "Load backup (JSON)",
+            "data.reset": "Delete local history",
+            "nav.workout": "Workout",
+            "nav.stats": "Stats",
+            "nav.settings": "Settings",
+            "wk.exercise": "Exercise",
+            "wk.exercises": "Exercises",
+            "wk.left": "Time left",
+            "wk.tense": "Tense",
+            "wk.relax": "Relax",
+            "wk.prepare": "Get ready",
+            "wk.rest": "Rest",
+            "wk.rep": "Rep {n} of {total}",
+            "aria.help": "Help",
+            "aria.abort": "Quit",
+            "aria.stealth": "Discreet mode",
+            "aria.sound": "Sound",
+            "aria.pause": "Pause",
+            "aria.resume": "Resume",
+            "aria.vibration": "Vibration",
+            "aria.skip": "Skip",
+            "help.how": "How to exercise:",
+            "help.p1": "sit, stand or lie down. Do not hold your breath and do not tighten your abdomen or glutes.",
+            "help.p2": "Breathe freely throughout the workout. Your phone vibrates while you tense (TENSE) and stops while you relax.",
+            "help.close": "Tap anywhere to close.",
+            "auth.modal.title": "Account sync",
+            "auth.modal.desc": "Sign in with your Google account to save your workouts, history and streaks in the database. Your progress will be available on all your devices.",
+            "auth.google": "Sign in with Google",
+            "auth.footer": "Data is stored in a secure Firebase Firestore database.",
+            "auth.account": "Signed-in account",
+            "auth.signout": "Sign out",
+            "auth.notconfigured.text": "Cloud sync is not set up yet. Data is stored locally in this browser. To sign in, add your Firebase configuration to the script (instructions are in README.md).",
+            "auth.status.local": "Not signed in (local mode)",
+            "auth.status.notconfigured": "Local mode (cloud not set up)",
+            "auth.status.signedin": "Signed in as: {name}",
+            "auth.status.syncing": "Syncing...",
+            "auth.status.synced": "Signed in as: {name} · synced",
+            "auth.err.sync.perm": "Firestore rules do not allow access. Check the rules (README).",
+            "auth.err.sync.fail": "Sync failed. Your data is saved locally.",
+            "auth.err.write.perm": "Firestore rules do not allow writing. Check the rules (README).",
+            "auth.err.write.fail": "Saving to the cloud failed. Your data is saved locally.",
+            "auth.err.notconfigured": "Cloud sign-in is not set up. Enter your FIREBASE_CONFIG in the script (instructions are in README.md).",
+            "auth.err.popup_blocked": "The browser blocked the sign-in window. Allow pop-ups for this page and try again.",
+            "auth.err.unauthorized_domain": "This address is not allowed in Firebase. Add the domain (e.g. localhost or your GitHub Pages domain) under Authentication -> Settings -> Authorized domains.",
+            "auth.err.operation_not_allowed": "Google sign-in is not enabled. Enable it in the Firebase console: Authentication -> Sign-in method -> Google.",
+            "auth.err.file_protocol": "Sign-in does not work when the page is opened as a file (file://). Open it over an http(s) address, e.g. run \"python3 -m http.server 8080\" and visit http://localhost:8080.",
+            "auth.err.network": "No internet connection. Check your connection and try again.",
+            "auth.err.invalid_key": "Invalid Firebase API key. Check FIREBASE_CONFIG in the script.",
+            "auth.err.generic": "Sign-in failed: {msg}",
+            "success.title": "Congratulations!",
+            "success.text": "You completed today's pelvic floor workout.",
+            "success.blocks": "Total blocks",
+            "success.streak": "Day streak",
+            "success.ok": "Great, continue",
+            "skip.confirm": "Skip the last exercise and finish the workout?",
+            "import.confirm": "Load this backup?\n\nWorkouts in history: {history}\nCompleted days: {days}\nStreak: {streak}\n\nYour current data will be replaced.",
+            "import.ok": "Backup loaded successfully.",
+            "import.bad": "This file is not a valid Kegel Fit backup.",
+            "import.readerr": "Could not read the file.",
+            "reset.confirm": "Are you sure you want to delete all local workout history?",
+        }
+        };
+
+        function detectLang() {
+            const l = String((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
+            return /^(sr|hr|bs|cnr)/.test(l) ? 'sr' : 'en';
+        }
+        function getLang() {
+            const st = window.userState && window.userState.settings;
+            return (st && (st.lang === 'sr' || st.lang === 'en')) ? st.lang : detectLang();
+        }
+        function t(key, params) {
+            const dict = I18N[getLang()] || I18N.sr;
+            let str = dict[key];
+            if (str === undefined) str = I18N.sr[key];
+            if (str === undefined) str = key;
+            if (params) str = str.replace(/\{(\w+)\}/g, (m, k) => (k in params ? params[k] : m));
+            return str;
+        }
+        function pluralCategory(n, lang) {
+            if (lang === 'sr') {
+                const m10 = n % 10, m100 = n % 100;
+                if (m10 === 1 && m100 !== 11) return 'one';
+                if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'few';
+                return 'other';
+            }
+            return n === 1 ? 'one' : 'other';
+        }
+        function tp(key, n, params) {
+            return t(`${key}.${pluralCategory(n, getLang())}`, Object.assign({ n }, params));
+        }
+        window.t = t;
+        window.tp = tp;
+
+        // Primijeni jezik na sve statične elemente
+        window.applyLanguage = function() {
+            const lang = getLang();
+            document.documentElement.lang = lang;
+            document.title = t('app.title');
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+            document.querySelectorAll('[data-i18n-alt]').forEach(el => el.setAttribute('alt', t(el.dataset.i18nAlt)));
+            document.querySelectorAll('option[data-sec]').forEach(o => { o.textContent = `${o.dataset.sec} ${t('unit.seconds')}`; });
+            const sel = document.getElementById('settingLang');
+            if (sel) sel.value = lang;
+            // dugme za prijavu: modul za Firebase ga prevodi sam; ako nije učitan, postavi osnovni tekst
+            if (window.refreshAuthUI) window.refreshAuthUI();
+            else { const un = document.getElementById('userName'); if (un) un.textContent = t('auth.signin'); }
+        };
+
+        window.setLanguage = function(lang) {
+            if (lang !== 'sr' && lang !== 'en') return;
+            window.userState.settings.lang = lang;
+            saveUserDataLocally();
+            applyLanguage();
+            renderUI();
+        };
+
         // --- PLAN VEŽBANJA: 25 NEDELJA x 7 DANA x 5 BLOKOVA ---
         // Svaki dan: [držanje(s), opuštanje(s), ponavljanja blokova 1..5]
         // Nedelje 1-12: spori · brzi · spori · brzi · spori
@@ -778,10 +1076,10 @@
             const [hold, relax, ...reps] = PLAN_DATA[idx] || PLAN_DATA[0];
             const kinds = idx < PLAN_SWITCH_DAY ? 'SFSFS' : 'FSFSF';
             return {
-                title: `Nedelja ${week} · Dan ${day}`,
+                title: t('day.title', { week, day }),
                 blocks: kinds.split('').map((k, i) => k === 'S'
-                    ? { type: 'tension', count: reps[i], tense: hold, relax: relax, name: 'Tension (Sporo)' }
-                    : { type: 'fast', count: reps[i], tense: 1, relax: 1, name: 'Fast tension (Brzo)' })
+                    ? { type: 'tension', count: reps[i], tense: hold, relax: relax, name: t('block.slow') }
+                    : { type: 'fast', count: reps[i], tense: 1, relax: 1, name: t('block.fast') })
             };
         }
         function weekDoneCount(week) {
@@ -890,6 +1188,7 @@
         // --- INITIALIZATION ---
         window.onload = function() {
             loadLocalUserData();
+            applyLanguage();
             buildRing(12);
             renderUI();
         };
@@ -920,12 +1219,12 @@
             const isDone = st.completedDays.includes(dayIndex(week, day));
 
             // Zaglavlje
-            document.getElementById('streakBadgeText').textContent = `Niz: ${st.streak} Dana`;
+            document.getElementById('streakBadgeText').textContent = tp('streak.badge', st.streak);
             document.getElementById('currentDayTitle').textContent = dayData.title;
-            document.getElementById('startBtnLabel').textContent = isDone ? 'Ponovi Trening' : 'Započni Trening';
-            document.getElementById('weekTitleText').textContent = `Plan ${week}. Nedelje`;
-            document.getElementById('weekProgressText').textContent = `${weekDoneCount(week)} od 7 završenih`;
-            document.getElementById('totalProgressText').textContent = `${st.completedDays.length} od ${TOTAL_WEEKS * 7} dana`;
+            document.getElementById('startBtnLabel').textContent = isDone ? t('home.repeat') : t('home.start');
+            document.getElementById('weekTitleText').textContent = t('week.plan', { week });
+            document.getElementById('weekProgressText').textContent = t('week.progress', { n: weekDoneCount(week) });
+            document.getElementById('totalProgressText').textContent = t('progress.total', { n: st.completedDays.length, total: TOTAL_WEEKS * 7 });
 
             // Kartice nedelja
             const weeksContainer = document.getElementById('weeksListContainer');
@@ -943,7 +1242,7 @@
                 }`;
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] uppercase tracking-wider">Nedelja</span>
+                        <span class="text-[10px] uppercase tracking-wider">${t('weeks.week')}</span>
                         ${all ? '<i class="fa-solid fa-circle-check text-brand-400 text-xs"></i>' : ''}
                     </div>
                     <div class="text-2xl font-bold leading-tight ${sel ? 'text-white' : ''}">${w}</div>
@@ -970,7 +1269,7 @@
                         : 'glass-card border-brand-border text-gray-400 hover:text-white'
                 }`;
                 card.innerHTML = `
-                    <span class="block text-[9px] uppercase tracking-wider">Dan</span>
+                    <span class="block text-[9px] uppercase tracking-wider">${t('days.day')}</span>
                     <span class="block text-base font-bold leading-tight">${i}</span>
                     ${completed ? '<i class="fa-solid fa-circle-check text-brand-400 text-[11px]"></i>' : '<i class="fa-solid fa-circle text-[7px] opacity-30"></i>'}
                 `;
@@ -995,7 +1294,7 @@
                         </div>
                         <div>
                             <h4 class="text-xs font-semibold text-white">${block.name}</h4>
-                            <p class="text-[11px] text-gray-400">Tense x ${block.tense}s - Relax x ${block.relax}s</p>
+                            <p class="text-[11px] text-gray-400">${t('block.detail', { tense: block.tense, relax: block.relax })}</p>
                         </div>
                     </div>
                     <span class="text-xs font-bold font-mono text-gray-300">x${block.count}</span>
@@ -1010,12 +1309,12 @@
             document.getElementById('statStreak').textContent = window.userState.streak;
             document.getElementById('statCompleted').textContent = window.userState.completedDays.length;
             const totalSecs = window.userState.history.reduce((acc, curr) => acc + (curr.durationSeconds || 0), 0);
-            document.getElementById('statTime').textContent = `${Math.round(totalSecs / 60)}m`;
+            document.getElementById('statTime').textContent = `${Math.round(totalSecs / 60)} min`;
 
             // History render
             const historyContainer = document.getElementById('historyListContainer');
             if (window.userState.history.length === 0) {
-                historyContainer.innerHTML = `<p class="text-xs text-gray-500 py-4 text-center">Još uvek nema zabeleženih treninga.</p>`;
+                historyContainer.innerHTML = `<p class="text-xs text-gray-500 py-4 text-center">${t('stats.empty')}</p>`;
             } else {
                 historyContainer.innerHTML = '';
                 [...window.userState.history].reverse().forEach(item => {
@@ -1023,10 +1322,10 @@
                     row.className = "py-2.5 flex justify-between items-center text-xs";
                     row.innerHTML = `
                         <div>
-                            <strong class="text-white">Nedelja ${item.week || 1} · Dan ${item.dayNumber} završen</strong>
-                            <span class="block text-gray-500 text-[10px]">${item.date}</span>
+                            <strong class="text-white">${t('history.done', { title: t('day.title', { week: item.week || 1, day: item.dayNumber }) })}</strong>
+                            <span class="block text-gray-500 text-[10px]">${formatDate(item.date)}</span>
                         </div>
-                        <span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-mono">+1 Trening</span>
+                        <span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 font-mono">${t('history.plus')}</span>
                     `;
                     historyContainer.appendChild(row);
                 });
@@ -1039,6 +1338,12 @@
 
             refreshQuickControls();
         };
+
+        function formatDate(iso) {
+            const d = new Date(iso + 'T00:00:00');
+            if (isNaN(d)) return iso;
+            return d.toLocaleDateString(getLang() === 'sr' ? 'sr-Latn-RS' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
 
         function selectDay(dayNum) {
             window.userState.selectedDay = dayNum;
@@ -1340,9 +1645,9 @@
 
             // Naslov iznad prstena
             const headline = document.getElementById('workoutHeadline');
-            if (phase === 'prepare') headline.textContent = 'Priprema';
-            else if (phase === 'rest') headline.textContent = 'Odmor';
-            else headline.textContent = `Ponavljanje ${workoutEngine.repIndex} od ${curBlock.count}`;
+            if (phase === 'prepare') headline.textContent = t('wk.prepare');
+            else if (phase === 'rest') headline.textContent = t('wk.rest');
+            else headline.textContent = t('wk.rep', { n: workoutEngine.repIndex, total: curBlock.count });
 
             // Trajanja u oznakama
             document.getElementById('tenseTab').textContent = `${shown.tense} s`;
@@ -1436,7 +1741,7 @@
             const pb = document.getElementById('pauseBtn');
             if (pb) {
                 pb.innerHTML = workoutEngine.paused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
-                pb.setAttribute('aria-label', workoutEngine.paused ? 'Nastavi' : 'Pauza');
+                pb.setAttribute('aria-label', workoutEngine.paused ? t('aria.resume') : t('aria.pause'));
             }
         }
 
@@ -1459,7 +1764,7 @@
                 playBeep(800, 'triangle', 0.3);
             } else {
                 // posljednja vježba: nema odmora, preskakanje završava trening
-                if (confirm('Preskočiti posljednju vježbu i završiti trening?')) finishWorkout();
+                if (confirm(t('skip.confirm'))) finishWorkout();
                 return;
             }
             runWorkoutLoop(); // restartuje otkucaj da prvi sekund nakon preskakanja traje punih 1s
@@ -1592,7 +1897,8 @@
                         settings: {
                             restPause: allowedRest.includes(rs.restPause) ? rs.restPause : def.settings.restPause,
                             vibration: typeof rs.vibration === 'boolean' ? rs.vibration : def.settings.vibration,
-                            sound: typeof rs.sound === 'boolean' ? rs.sound : def.settings.sound
+                            sound: typeof rs.sound === 'boolean' ? rs.sound : def.settings.sound,
+                            ...((rs.lang === 'sr' || rs.lang === 'en') ? { lang: rs.lang } : {})
                         },
                         history: Array.isArray(raw.history)
                             ? raw.history
@@ -1609,38 +1915,41 @@
                     const looksValid = ['selectedDay', 'completedDays', 'streak', 'history', 'settings'].some(k => k in raw);
                     if (!looksValid) throw new Error('format');
 
-                    const msg = `Učitati rezervnu kopiju?\n\nTreninga u istoriji: ${clean.history.length}\nZavršenih dana: ${clean.completedDays.length}\nNiz: ${clean.streak}\n\nTrenutni podaci će biti zamijenjeni.`;
+                    const msg = t('import.confirm', { history: clean.history.length, days: clean.completedDays.length, streak: clean.streak });
                     if (!confirm(msg)) return;
 
                     window.userState = clean;
                     saveUserDataLocally();
                     renderUI();
-                    alert('Rezervna kopija je uspješno učitana.');
+                    applyLanguage();
+                    alert(t('import.ok'));
                 } catch (e) {
-                    alert('Datoteka nije ispravna rezervna kopija Kegel Fit aplikacije.');
+                    alert(t('import.bad'));
                 } finally {
                     input.value = '';
                 }
             };
             reader.onerror = function() {
-                alert('Čitanje datoteke nije uspjelo.');
+                alert(t('import.readerr'));
                 input.value = '';
             };
             reader.readAsText(file);
         };
 
         window.resetAllData = function() {
-            if (confirm("Da li ste sigurni da želite da obrišete svu lokalnu istoriju vežbi?")) {
+            if (confirm(t('reset.confirm'))) {
                 localStorage.removeItem('kegel_fit_state');
+                const keepLang = window.userState.settings.lang;      // izabrani jezik se zadržava
                 window.userState = {
                     selectedWeek: 1,
                     selectedDay: 1,
                     completedDays: [],
                     streak: 0,
                     lastWorkoutDate: null,
-                    settings: { restPause: 15, vibration: true, sound: true },
+                    settings: Object.assign({ restPause: 15, vibration: true, sound: true }, keepLang ? { lang: keepLang } : {}),
                     history: []
                 };
+                applyLanguage();
                 renderUI();
             }
         };

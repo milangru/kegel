@@ -1,5 +1,7 @@
 # Kegel Fit
 
+*[English version](README.en.md)*
+
 Web aplikacija za vođeno vežbanje mišića karličnog dna (Kegelove vežbe) u jednom HTML fajlu: tajmer sa stezanjem i opuštanjem, vibracija i zvuk, plan od 25 nedelja i praćenje napretka.
 
 > **Napomena:** aplikacija je pomagalo za vežbanje, a ne medicinski savet. Ako imate zdravstvenih tegoba ili bol pri vežbanju, obratite se lekaru ili fizioterapeutu.
@@ -12,6 +14,7 @@ Web aplikacija za vođeno vežbanje mišića karličnog dna (Kegelove vežbe) u 
 - **Vibracija** koja radi neprekidno dok traje STISNI i staje na OPUSTI.
 - **Zvučni signali** pri promeni faze.
 - **Statistika**: niz dana, broj odrađenih treninga, ukupno vreme i istorija.
+- **Dva jezika:** srpski (latinica) i engleski. Pri prvom otvaranju jezik se bira prema pregledaču (srpski, hrvatski i bosanski daju srpski, ostalo engleski), a izbor se menja u Podešavanjima, pamti se i sinhronizuje preko Firebase-a.
 - **Rezervna kopija** podataka (izvoz i uvoz JSON fajla).
 - Opciona **prijava preko Google naloga** i sinhronizacija u Firebase Firestore.
 
@@ -46,6 +49,7 @@ Dugmad ispod prstena, redom:
 
 ### Podešavanja
 
+- **Jezik:** srpski ili engleski.
 - **Pauza između blokova:** 5, 10, 15, 20 ili 30 sekundi (podrazumevano 15 s).
 - **Vibracija** i **zvuk**: uključivanje i isključivanje.
 - **Rezervna kopija:** preuzimanje i učitavanje JSON fajla sa napretkom. Učitavanje **zamenjuje** trenutne podatke, a pre toga traži potvrdu i proverava ispravnost fajla.
@@ -87,6 +91,12 @@ Plan je u nizu `PLAN_DATA` u skripti, jedan red po nedelji, sedam unosa po redu.
 ```
 
 Na primer, `[3,3,4,6,4,6,4]` je dan sa držanjem 3 s, opuštanjem 3 s i blokovima od 4, 6, 4, 6 i 4 ponavljanja. Redosled tipova blokova određuje konstanta `PLAN_SWITCH_DAY` (od 85. dana, tj. od nedelje 13, raspored je brzi · spori · brzi · spori · brzi). Brzi blokovi su uvek 1 s / 1 s.
+
+## Prevodi
+
+Svi tekstovi aplikacije su u objektu `I18N` na početku skripte, sa ključevima za `sr` i `en`. Statični tekstovi u HTML-u imaju atribut `data-i18n="ključ"`, a tekstovi koje piše JavaScript prolaze kroz funkciju `t('ključ', {parametri})`. Za reči sa množinom (npr. „1 dan“, „2 dana“) postoji `tp()`, koja zna srpska pravila (1 / 2–4 / 5 i više).
+
+Za dodavanje novog jezika dodajte novi objekat pored `sr` i `en`, proširite funkciju `detectLang()` i dodajte opciju u izbor jezika u Podešavanjima. Svi ključevi moraju postojati u svim jezicima. Izbor jezika se čuva u `settings.lang` i ulazi u rezervnu kopiju.
 
 ## Čuvanje podataka
 
@@ -140,6 +150,7 @@ Zvuk i vibracija počinju tek posle dodira na ekran (npr. na dugme Započni), je
 ## Struktura projekta
 
 - `kegel_fit_web_app.html`: cela aplikacija (HTML, CSS i JavaScript), uz poseban modul unutar istog fajla za Firebase
+- `README.md` i `README.en.md`: dokumentacija na srpskom i engleskom
 - `firestore.rules`: pravila za Firestore bazu
 - `LICENSE`: GNU GPL v3
 
