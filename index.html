@@ -26,6 +26,11 @@
     <link rel="shortcut icon" href="favicon/favicon.ico">
     <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
     <link rel="manifest" href="favicon/site.webmanifest">
+    <meta name="theme-color" content="#111827">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Kegel Fit">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -533,6 +538,15 @@
         </div>
     </div>
 
+    <!-- SERVICE WORKER (offline rad) -->
+    <script>
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW registracija nije uspela:', err));
+            });
+        }
+    </script>
+
     <!-- FIREBASE SDK & APP SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -671,6 +685,7 @@
             if (syncPromise) return syncPromise;
             syncPromise = (async () => {
                 if (!currentUser || !db) return;
+                if (!navigator.onLine) { setCloudStatus(window.t('auth.status.offline')); return; }
                 setCloudStatus(window.t('auth.status.syncing'));
                 try {
                     const ref = userDocRef(currentUser.uid);
@@ -699,6 +714,10 @@
                 setCloudStatus(window.t(e.code === 'permission-denied' ? 'auth.err.write.perm' : 'auth.err.write.fail'));
             }
         };
+
+        // Offline/online: napredak je uvijek upisan lokalno; čim se vrati internet, spoji ga sa oblakom
+        window.addEventListener('online', () => { if (currentUser) syncDataFromCloud(); });
+        window.addEventListener('offline', () => { if (currentUser) setCloudStatus(window.t('auth.status.offline')); });
 
         function updateAuthUI(user) {
             const userNameEl = document.getElementById('userName');
@@ -845,6 +864,7 @@
             "auth.status.notconfigured": "Lokalni režim (cloud nije podešen)",
             "auth.status.signedin": "Prijavljeni ste kao: {name}",
             "auth.status.syncing": "Sinhronizacija...",
+            "auth.status.offline": "Offline · napredak se čuva na telefonu i sinhronizuje se kad se vratiš online",
             "auth.status.synced": "Prijavljeni ste kao: {name} · sinhronizovano",
             "auth.err.sync.perm": "Firestore pravila ne dozvoljavaju pristup. Proverite pravila (README).",
             "auth.err.sync.fail": "Sinhronizacija nije uspela. Podaci su sačuvani lokalno.",
@@ -953,6 +973,7 @@
             "auth.status.notconfigured": "Local mode (cloud not set up)",
             "auth.status.signedin": "Signed in as: {name}",
             "auth.status.syncing": "Syncing...",
+            "auth.status.offline": "Offline · progress is saved on your phone and will sync when you're back online",
             "auth.status.synced": "Signed in as: {name} · synced",
             "auth.err.sync.perm": "Firestore rules do not allow access. Check the rules (README).",
             "auth.err.sync.fail": "Sync failed. Your data is saved locally.",
