@@ -1686,6 +1686,9 @@
                 workoutEngine.frozen = Math.min(1, (performance.now() - workoutEngine.lastTick) / 1000);
             } else {
                 workoutEngine.lastTick = performance.now() - workoutEngine.frozen * 1000;
+                // Nastavak je klik korisnika, pa browser dozvoljava ponovni fullscreen
+                // (nakon poziva/app switch-a browser ga sam napusti)
+                if (workoutEngine.active) { enterFullscreen(); acquireWakeLock(); }
             }
             syncHaptic();
             refreshQuickControls();
