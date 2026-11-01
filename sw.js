@@ -1,12 +1,14 @@
 // Kegel Fit service worker: omogućava rad bez interneta.
 // Kad izmeniš index.html, ne moraš ništa da diraš ovde (HTML se uvek prvo traži sa mreže).
 // Povećaj verziju samo ako menjaš spisak PRECACHE fajlova.
-const CACHE = 'kegel-fit-v2';
+const CACHE = 'kegel-fit-v3';
 
 const LOCAL = [
   './',
   './index.html',
-  './favicon/site.webmanifest',
+  './manifest.webmanifest',
+  './favicon/android-chrome-192x192.png',
+  './favicon/android-chrome-512x512.png',
   './favicon/favicon.ico',
   './favicon/favicon-16x16.png',
   './favicon/favicon-32x32.png',
