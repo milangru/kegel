@@ -92,11 +92,40 @@ Na primer, `[3,3,4,6,4,6,4]` je dan sa držanjem 3 s, opuštanjem 3 s i blokovim
 
 - **Lokalno:** u `localStorage` pregledača, pod ključem `kegel_fit_state`. Čuvaju se izabrana nedelja i dan, odrađeni dani, niz, istorija i podešavanja.
 - **Redni broj dana:** odrađeni dani se pamte kao broj od 1 do 175 (nedelja 1 dan 1 je 1, nedelja 25 dan 7 je 175). Rezervne kopije iz starije verzije, koja je imala samo prvu nedelju, i dalje se ispravno učitavaju.
-- **Cloud (opciono):** posle prijave se podaci sinhronizuju u Firebase Firestore.
+- **Cloud (opciono):** posle prijave Google nalogom podaci se sinhronizuju u Firebase Firestore, u dokument `users/{uid}`. Pri prvoj prijavi lokalni i oblak podaci se **spajaju** (odrađeni dani i istorija se objedine, niz je veći od dva), pa se ništa ne gubi.
 
-### Podešavanje Firebase-a
+### Podešavanje Firebase-a (prijava i cloud baza)
 
-Fajl u izvornom obliku sadrži probnu (demo) Firebase konfiguraciju, pa prijava i cloud sinhronizacija ne rade dok ne unesete sopstvenu. Za to u skripti pronađite objekat `firebaseConfig` i zamenite ga podacima iz vašeg Firebase projekta. U projektu treba uključiti Google prijavu (Authentication) i Firestore bazu. Bez toga aplikacija radi sa lokalnim podacima.
+Dok se ne unese sopstvena konfiguracija, aplikacija radi u lokalnom režimu, a u prozoru za prijavu piše da cloud nije podešen.
+
+1. **Napravite projekat** u [Firebase konzoli](https://console.firebase.google.com/) (Add project). Google Analytics nije potreban.
+2. **Dodajte Web aplikaciju:** Project settings → Your apps → ikona `</>` → unesite naziv → Register app. Kopirajte objekat `firebaseConfig`.
+3. **Zalepite konfiguraciju** u `kegel_fit_web_app.html`, u objekat `FIREBASE_CONFIG` na početku modula (`<script type="module">`). API ključ nije tajna: bezbednost obezbeđuju pravila i dozvoljeni domeni.
+4. **Uključite Google prijavu:** Build → Authentication → Get started → Sign-in method → Google → Enable. Izaberite e-adresu za podršku i sačuvajte.
+5. **Napravite Firestore bazu:** Build → Firestore Database → Create database. Izaberite lokaciju bliže sebi (npr. `eur3`) i počnite u production režimu.
+6. **Postavite pravila:** Firestore → Rules → zalepite sadržaj fajla [`firestore.rules`](firestore.rules) → Publish. Pravila dozvoljavaju svakom korisniku samo njegov dokument `users/{uid}`, a sve ostalo zabranjuju.
+7. **Dozvolite domene:** Authentication → Settings → Authorized domains. `localhost` je već tu. Dodajte domen na kojem aplikaciju objavljujete (npr. `korisnik.github.io`).
+
+#### Testiranje na računaru
+
+Google prijava **ne radi** kad se stranica otvori kao fajl (`file://`). Pokrenite lokalni server u folderu sa aplikacijom:
+
+```bash
+python3 -m http.server 8080
+```
+
+pa otvorite `http://localhost:8080/kegel_fit_web_app.html`.
+
+#### Česte greške
+
+| Poruka ili ponašanje | Uzrok |
+|---|---|
+| „Cloud prijava nije podešena“ | `FIREBASE_CONFIG` još sadrži `YOUR_...` vrednosti. |
+| „Ova adresa nije dozvoljena u Firebase-u“ | Domen nije u Authorized domains (korak 7). |
+| „Google prijava nije uključena“ | Nije izvršen korak 4. |
+| „Prijava ne radi kad je stranica otvorena kao fajl“ | Otvorite je preko `http://localhost` ili GitHub Pages. |
+| „Firestore pravila ne dozvoljavaju pristup“ | Pravila nisu postavljena ili nisu objavljena (korak 6). |
+| Prozor za prijavu se ne otvara | Pregledač blokira iskačuće prozore za ovu stranicu. |
 
 ## Podrška pregledača
 
@@ -110,7 +139,9 @@ Zvuk i vibracija počinju tek posle dodira na ekran (npr. na dugme Započni), je
 
 ## Struktura projekta
 
-Ceo projekat je jedan fajl, `kegel_fit_web_app.html`, sa HTML-om, CSS-om i JavaScript-om. Za Firebase se koristi poseban modul unutar istog fajla.
+- `kegel_fit_web_app.html`: cela aplikacija (HTML, CSS i JavaScript), uz poseban modul unutar istog fajla za Firebase
+- `firestore.rules`: pravila za Firestore bazu
+- `LICENSE`: GNU GPL v3
 
 ## Licenca
 

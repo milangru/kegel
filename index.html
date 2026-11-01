@@ -1,4 +1,21 @@
 <!DOCTYPE html>
+<!--
+    Kegel Fit - vođeno vežbanje mišića karličnog dna
+    Copyright (C) 2026  Milan (milangru)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
 <html lang="sr" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -500,125 +517,172 @@
     <!-- FIREBASE SDK & APP SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            signInWithPopup, 
-            GoogleAuthProvider, 
-            signOut, 
-            onAuthStateChanged,
-            signInWithCustomToken,
-            signInAnonymously
+        import {
+            getAuth,
+            signInWithPopup,
+            GoogleAuthProvider,
+            signOut,
+            onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc, 
-            updateDoc 
+        import {
+            getFirestore,
+            doc,
+            getDoc,
+            setDoc
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global state for Firebase
-        let auth, db, currentUser = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kegel-fit-app';
+        // ============================================================
+        //  FIREBASE PODEŠAVANJE
+        //  1) Firebase konzola -> Project settings -> Your apps -> Web app -> Config
+        //  2) Zalijepite vrijednosti ispod (API ključ nije tajna; zaštitu daju
+        //     Firestore pravila i "Authorized domains")
+        //  Detaljno uputstvo: README.md
+        // ============================================================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDjjCMn71aSxNMcn2XVS1H1sojqGhS9SI0",
+            authDomain: "kegel-34a00.firebaseapp.com",
+            projectId: "kegel-34a00",
+            storageBucket: "kegel-34a00.firebasestorage.app",
+            messagingSenderId: "289274897314",
+            appId: "1:289274897314:web:a6bbaae08cc3e6170b48fb"
+        };
 
-        // Initialize Firebase
-        try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' 
-                ? JSON.parse(__firebase_config) 
-                : {
-                    apiKey: "AIzaSyDemoDummyKeyForPreviewModeOnly",
-                    authDomain: "kegel-fit-demo.firebaseapp.com",
-                    projectId: "kegel-fit-demo",
-                    storageBucket: "kegel-fit-demo.appspot.com",
-                    messagingSenderId: "123456789",
-                    appId: "1:123456789:web:abcdef"
-                };
+        const firebaseConfigured = !!FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('YOUR_')
+                                   && !String(FIREBASE_CONFIG.projectId).startsWith('YOUR_');
 
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+        let auth = null, db = null, currentUser = null;
+        let cloudReady = false;        // upis u oblak je dozvoljen tek nakon prvog spajanja podataka
+        let syncPromise = null;
 
-            // Auth State Listener
-            onAuthStateChanged(auth, async (user) => {
-                currentUser = user;
-                updateAuthUI(user);
-                if (user) {
-                    await syncDataFromCloud();
-                }
-            });
-
-            // Initial auto-auth check
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                signInWithCustomToken(auth, __initial_auth_token).catch(() => {});
-            }
-        } catch (err) {
-            console.warn("Firebase Init fallback:", err);
+        const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const userDocRef = (uid) => doc(db, 'users', uid);
+        function setCloudStatus(text) {
+            const el = document.getElementById('cloudSyncStatusText');
+            if (el) el.textContent = text;
         }
 
-        // Google Sign In Handler
+        // Spajanje lokalnih i oblak podataka (ništa se ne gubi pri prvoj prijavi)
+        function mergeStates(local, cloud) {
+            const L = local || {}, C = cloud || {};
+            const completedDays = [...new Set([...(L.completedDays || []), ...(C.completedDays || [])])].sort((a, b) => a - b);
+            const hKey = h => `${h.date}|${h.week || 1}|${h.dayNumber}|${h.durationSeconds}`;
+            const byKey = new Map();
+            [...(C.history || []), ...(L.history || [])].forEach(h => { if (h && h.date) byKey.set(hKey(h), h); });
+            const history = [...byKey.values()].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+            const lastL = L.lastWorkoutDate || '', lastC = C.lastWorkoutDate || '';
+            const base = lastC >= lastL ? C : L;       // novije stanje određuje izbor nedelje/dana i podešavanja
+            return {
+                selectedWeek: base.selectedWeek || L.selectedWeek || 1,
+                selectedDay: base.selectedDay || L.selectedDay || 1,
+                completedDays,
+                streak: Math.max(L.streak || 0, C.streak || 0),
+                lastWorkoutDate: (lastL > lastC ? lastL : lastC) || null,
+                settings: { ...(L.settings || {}), ...(base.settings || {}) },
+                history
+            };
+        }
+
+        const AUTH_ERRORS = {
+            'auth/popup-closed-by-user': null,
+            'auth/cancelled-popup-request': null,
+            'auth/popup-blocked': 'Pregledač je blokirao prozor za prijavu. Dozvolite iskačuće prozore za ovu stranicu i pokušajte ponovo.',
+            'auth/unauthorized-domain': 'Ova adresa nije dozvoljena u Firebase-u. Dodajte domen (npr. localhost ili vaš GitHub Pages domen) u Authentication -> Settings -> Authorized domains.',
+            'auth/operation-not-allowed': 'Google prijava nije uključena. Uključite je u Firebase konzoli: Authentication -> Sign-in method -> Google.',
+            'auth/operation-not-supported-in-this-environment': 'Prijava ne radi kad je stranica otvorena kao fajl (file://). Otvorite je preko http(s) adrese, npr. komandom "python3 -m http.server 8080" pa http://localhost:8080.',
+            'auth/network-request-failed': 'Nema veze sa internetom. Proverite konekciju i pokušajte ponovo.',
+            'auth/invalid-api-key': 'Neispravan Firebase API ključ. Proverite FIREBASE_CONFIG u skripti.',
+            'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Neispravan Firebase API ključ. Proverite FIREBASE_CONFIG u skripti.'
+        };
+
+        // Inicijalizacija Firebase-a
+        if (firebaseConfigured) {
+            try {
+                const app = initializeApp(FIREBASE_CONFIG);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    currentUser = user;
+                    updateAuthUI(user);
+                    if (user) await syncDataFromCloud();
+                    else cloudReady = false;
+                });
+            } catch (err) {
+                console.warn("Firebase init error:", err);
+                auth = db = null;
+            }
+        }
+
+        // Prijava preko Google naloga
         window.handleGoogleSignIn = async function() {
-            if (!auth) {
-                alert("Firebase nije inicijalizovan.");
+            if (!firebaseConfigured || !auth) {
+                alert('Cloud prijava nije podešena. U skripti unesite svoju FIREBASE_CONFIG (uputstvo je u README.md).');
                 return;
             }
-            const provider = new GoogleAuthProvider();
+            if (location.protocol === 'file:') {
+                alert(AUTH_ERRORS['auth/operation-not-supported-in-this-environment']);
+                return;
+            }
             try {
-                const result = await signInWithPopup(auth, provider);
-                currentUser = result.user;
-                updateAuthUI(currentUser);
-                closeAuthModal();
-                await syncDataFromCloud();
+                await signInWithPopup(auth, new GoogleAuthProvider());
+                closeAuthModal();      // dalje preuzima onAuthStateChanged
             } catch (error) {
                 console.error("Google Auth error:", error);
-                alert("Prijava nije uspela: " + error.message);
+                const known = error.code in AUTH_ERRORS ? AUTH_ERRORS[error.code] : 'Prijava nije uspela: ' + (error.message || error.code);
+                if (known) alert(known);
             }
         };
 
         window.handleSignOut = async function() {
-            if (auth) {
-                await signOut(auth);
-                currentUser = null;
-                updateAuthUI(null);
-                closeAuthModal();
-            }
+            if (!auth) return;
+            await signOut(auth);
+            currentUser = null;
+            cloudReady = false;
+            updateAuthUI(null);
+            closeAuthModal();
         };
 
-        // Firestore sync functions
-        async function syncDataFromCloud() {
-            if (!currentUser || !db) return;
-            try {
-                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'userProfile');
-                const docSnap = await getDoc(userDocRef);
-
-                if (docSnap.exists()) {
-                    const cloudData = docSnap.data();
-                    window.userState = { ...window.userState, ...cloudData };
-                    window.saveUserDataLocally();
+        // Preuzmi podatke iz oblaka, spoji sa lokalnim i vrati spojeno stanje u oblak
+        function syncDataFromCloud() {
+            if (syncPromise) return syncPromise;
+            syncPromise = (async () => {
+                if (!currentUser || !db) return;
+                setCloudStatus('Sinhronizacija...');
+                try {
+                    const ref = userDocRef(currentUser.uid);
+                    const snap = await getDoc(ref);
+                    window.userState = snap.exists() ? mergeStates(window.userState, snap.data()) : mergeStates(window.userState, {});
+                    cloudReady = true;
+                    window.saveUserDataLocally();     // upisuje lokalno i šalje spojeno stanje u oblak
                     window.renderUI();
-                } else {
-                    // Push current state to cloud
-                    await setDoc(userDocRef, window.userState);
+                    setCloudStatus(`Prijavljen kao: ${currentUser.email || currentUser.displayName} · sinhronizovano`);
+                } catch (e) {
+                    console.error("Firestore sync error:", e);
+                    setCloudStatus(e.code === 'permission-denied'
+                        ? 'Firestore pravila ne dozvoljavaju pristup. Proverite pravila (README).'
+                        : 'Sinhronizacija nije uspela. Podaci su sačuvani lokalno.');
                 }
-            } catch (e) {
-                console.error("Firestore sync read error:", e);
-            }
+            })().finally(() => { syncPromise = null; });
+            return syncPromise;
         }
 
+        // Poziva se pri svakom čuvanju (saveUserDataLocally)
         window.syncDataToCloud = async function() {
-            if (!currentUser || !db) return;
+            if (!currentUser || !db || !cloudReady) return;
             try {
-                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'userProfile');
-                await setDoc(userDocRef, window.userState, { merge: true });
+                await setDoc(userDocRef(currentUser.uid), window.userState);
             } catch (e) {
-                console.error("Firestore sync write error:", e);
+                console.error("Firestore write error:", e);
+                setCloudStatus(e.code === 'permission-denied'
+                    ? 'Firestore pravila ne dozvoljavaju upis. Proverite pravila (README).'
+                    : 'Upis u oblak nije uspeo. Podaci su sačuvani lokalno.');
             }
-        }
+        };
 
         function updateAuthUI(user) {
             const userNameEl = document.getElementById('userName');
             const userAvatarEl = document.getElementById('userAvatar');
             const userIconEl = document.getElementById('userIcon');
-            const syncStatusEl = document.getElementById('cloudSyncStatusText');
             const modalActionEl = document.getElementById('authModalActionContainer');
 
             if (user) {
@@ -628,13 +692,13 @@
                     userAvatarEl.classList.remove('hidden');
                     userIconEl.classList.add('hidden');
                 }
-                syncStatusEl.textContent = `Prijavljen kao: ${user.email || user.displayName}`;
-                
+                setCloudStatus(`Prijavljen kao: ${user.email || user.displayName}`);
+
                 modalActionEl.innerHTML = `
                     <div class="p-3 bg-brand-card rounded-xl mb-3 text-left">
                         <span class="block text-xs text-gray-400">Prijavljen nalog</span>
-                        <strong class="text-sm text-white">${user.displayName || 'Korisnik'}</strong>
-                        <p class="text-xs text-gray-400 truncate">${user.email || ''}</p>
+                        <strong class="text-sm text-white">${esc(user.displayName || 'Korisnik')}</strong>
+                        <p class="text-xs text-gray-400 truncate">${esc(user.email)}</p>
                     </div>
                     <button onclick="handleSignOut()" class="w-full py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-sm font-semibold">
                         Odjavi se
@@ -644,8 +708,15 @@
                 userNameEl.textContent = "Prijava";
                 userAvatarEl.classList.add('hidden');
                 userIconEl.classList.remove('hidden');
-                syncStatusEl.textContent = "Korisnik nije prijavljen (lokalni režim)";
-                
+
+                if (!firebaseConfigured) {
+                    setCloudStatus('Lokalni režim (cloud nije podešen)');
+                    modalActionEl.innerHTML = `
+                        <p class="text-xs text-gray-400 leading-relaxed">Cloud sinhronizacija još nije podešena. Podaci se čuvaju lokalno u ovom pregledaču. Za prijavu unesite Firebase konfiguraciju u skriptu (uputstvo je u README.md).</p>
+                    `;
+                    return;
+                }
+                setCloudStatus('Korisnik nije prijavljen (lokalni režim)');
                 modalActionEl.innerHTML = `
                     <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-semibold text-sm flex items-center justify-center gap-3 transition shadow-lg">
                         <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -659,6 +730,9 @@
                 `;
             }
         }
+
+        // Početno stanje interfejsa
+        updateAuthUI(null);
     </script>
 
     <!-- CORE APPLICATION LOGIC -->
