@@ -692,6 +692,7 @@
                     const snap = await getDoc(ref);
                     window.userState = snap.exists() ? mergeStates(window.userState, snap.data()) : mergeStates(window.userState, {});
                     cloudReady = true;
+                    if (window.jumpToNextDay) window.jumpToNextDay();   // posle spajanja ponovo izaberi sljedeći dan
                     window.saveUserDataLocally();     // upisuje lokalno i šalje spojeno stanje u oblak
                     window.renderUI();
                     window.applyLanguage();
@@ -1206,12 +1207,25 @@
         }
         document.addEventListener('visibilitychange', () => { if (document.hidden) stopHaptic(); });
 
+        // Postavlja izbor na sljedeći dan posle najdaljeg odrađenog (ili na 1. dan ako ništa nije odrađeno)
+        window.jumpToNextDay = function() {
+            const st = window.userState;
+            const total = TOTAL_WEEKS * 7;
+            const done = (st.completedDays || []).filter(n => Number.isInteger(n) && n >= 1 && n <= total);
+            const next = done.length ? Math.min(Math.max(...done) + 1, total) : 1;
+            st.selectedWeek = Math.floor((next - 1) / 7) + 1;
+            st.selectedDay = ((next - 1) % 7) + 1;
+        };
+
         // --- INITIALIZATION ---
         window.onload = function() {
             loadLocalUserData();
+            jumpToNextDay();
             applyLanguage();
             buildRing(12);
             renderUI();
+            // izabrana nedelja na sredinu liste (bez animacije pri otvaranju)
+            requestAnimationFrame(() => scrollWeekIntoView('auto'));
         };
 
         window.loadLocalUserData = function() {
@@ -1384,12 +1398,12 @@
         }
 
         // Centriraj izabranu nedelju u horizontalnoj listi (ne radi ništa dok je ekran sakriven)
-        function scrollWeekIntoView() {
+        function scrollWeekIntoView(behavior) {
             const c = document.getElementById('weeksListContainer');
             if (!c || !c.clientWidth) return;
             const card = c.querySelector(`[data-week="${window.userState.selectedWeek}"]`);
             if (!card) return;
-            c.scrollTo({ left: card.offsetLeft - (c.clientWidth - card.clientWidth) / 2, behavior: 'smooth' });
+            c.scrollTo({ left: card.offsetLeft - (c.clientWidth - card.clientWidth) / 2, behavior: behavior === 'auto' ? 'auto' : 'smooth' });
         }
 
         window.switchTab = function(tabName) {
@@ -1404,7 +1418,7 @@
 
             if (tabName === 'home') {
                 document.getElementById('tab-home').classList.remove('hidden');
-                requestAnimationFrame(scrollWeekIntoView);
+                requestAnimationFrame(() => scrollWeekIntoView());
                 document.getElementById('nav-home').className = "flex flex-col items-center gap-1 p-2 text-brand-400 font-semibold";
             } else if (tabName === 'stats') {
                 document.getElementById('tab-stats').classList.remove('hidden');
