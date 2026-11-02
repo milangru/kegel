@@ -37,5 +37,8 @@
             "form_factor": "narrow",
             "label": "Ekran sa vežbama"
         }
-    ]
+    ],
+    "id": "io.github.milangru.kegel",
+    "lang": "en",
+    "categories": ["health", "health &amp; fitness"]
 }
