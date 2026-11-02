@@ -24,14 +24,14 @@
     ],
     "screenshots": [
         {
-            "src": "favicon/screenshot1.jpg",
+            "src": "favicon/screenshot1.jpeg",
             "sizes": "720x1600",
             "type": "image/jpeg",
             "form_factor": "narrow",
             "label": "Glavni ekran aplikacije"
         },
         {
-            "src": "favicon/screenshot2.jpg",
+            "src": "favicon/screenshot2.jpeg",
             "sizes": "720x1600",
             "type": "image/jpeg",
             "form_factor": "narrow",
