@@ -2,7 +2,7 @@
 
 *[English version](README.en.md)*
 
-Web aplikacija za vođeno vežbanje mišića karličnog dna (Kegelove vežbe) u jednom HTML fajlu: tajmer sa stezanjem i opuštanjem, vibracija i zvuk, plan od 25 nedelja i praćenje napretka.
+Web aplikacija za vođeno vežbanje mišića karličnog dna (Kegelove vežbe): tajmer sa stezanjem i opuštanjem, vibracija i zvuk, plan od 25 nedelja i praćenje napretka. Radi u pregledaču, može da se instalira na početni ekran telefona i radi bez interneta.
 
 > **Napomena:** aplikacija je pomagalo za vežbanje, a ne medicinski savet. Ako imate zdravstvenih tegoba ili bol pri vežbanju, obratite se lekaru ili fizioterapeutu.
 
@@ -10,28 +10,40 @@ Web aplikacija za vođeno vežbanje mišića karličnog dna (Kegelove vežbe) u 
 
 - **Plan od 25 nedelja**, svaka sa 7 dana, svaki dan sa 5 blokova. Trajanje raste od oko 2:39 (nedelja 1, dan 1) do oko 15:00 (nedelja 25, dan 7).
 - **Slobodan izbor** bilo koje nedelje i bilo kog dana (bez zaključavanja).
-- **Ekran za vežbanje preko celog ekrana** sa prstenom koji pokazuje napredak kroz seriju, oznakama STISNI / OPUSTI i odbrojavanjem.
+- **Ekran za vežbanje preko celog ekrana** sa prstenom koji pokazuje napredak kroz seriju, oznakama STISNI / OPUSTI i odbrojavanjem. Ekran ostaje upaljen dok traje trening.
 - **Vibracija** koja radi neprekidno dok traje STISNI i staje na OPUSTI.
 - **Zvučni signali** pri promeni faze.
-- **Statistika**: niz dana, broj odrađenih treninga, ukupno vreme i istorija.
-- **Dva jezika:** srpski (latinica) i engleski. Pri prvom otvaranju jezik se bira prema pregledaču (srpski, hrvatski i bosanski daju srpski, ostalo engleski), a izbor se menja u Podešavanjima, pamti se i sinhronizuje preko Firebase-a.
+- **Rad bez interneta (PWA):** aplikacija se može instalirati na početni ekran i posle prvog učitavanja radi i offline.
+- **Statistika:** niz dana, broj odrađenih treninga, ukupno vreme i istorija.
+- **Dva jezika:** srpski (latinica) i engleski. Pri prvom otvaranju jezik se bira prema pregledaču (srpski, hrvatski i bosanski daju srpski, ostalo engleski). Izbor se menja u Podešavanjima, pamti se i sinhronizuje preko Firebase-a.
 - **Rezervna kopija** podataka (izvoz i uvoz JSON fajla).
 - Opciona **prijava preko Google naloga** i sinhronizacija u Firebase Firestore.
 
 ## Pokretanje
 
-Aplikacija ne traži instalaciju ni build.
+Aplikacija ne traži instalaciju ni build. Cela aplikacija je u fajlu `index.html`.
 
-1. Otvorite `kegel_fit_web_app.html` u pregledaču (dvoklik ili `File → Open`).
-2. Za korišćenje na telefonu postavite fajl na bilo koji statički hosting (npr. GitHub Pages) i otvorite adresu u pregledaču.
+1. Postavite sadržaj repozitorijuma na bilo koji statički hosting (npr. GitHub Pages) i otvorite adresu u pregledaču.
+2. Za brzo isprobavanje na računaru pokrenite lokalni server (vidi [Testiranje na računaru](#testiranje-na-računaru)).
 
-Potrebna je internet veza pri učitavanju, jer se sledeće biblioteke učitavaju sa CDN-a: Tailwind CSS, Font Awesome i Google Fonts (Inter). Podaci o vežbanju se čuvaju lokalno u pregledaču.
+Fajl `index.html` može da se otvori i dvoklikom, ali tada **ne rade** offline režim (service worker) ni Google prijava, jer oba traže `http://` ili `https://`.
+
+Potrebna je internet veza pri prvom učitavanju, jer se sledeće biblioteke učitavaju sa CDN-a: Tailwind CSS, Font Awesome, Google Fonts (Inter) i Firebase SDK. Service worker ih zatim čuva u kešu, pa aplikacija posle toga radi i bez interneta.
+
+### Instalacija na telefon
+
+- **Android (Chrome):** meni (⋮) → *Instaliraj aplikaciju* ili *Dodaj na početni ekran*.
+- **iPhone (Safari):** dugme za deljenje → *Dodaj na početni ekran*.
+
+Instalirana aplikacija se otvara preko celog ekrana, bez trake pregledača, u uspravnom položaju.
 
 ## Kako se koristi
 
 1. Na početnom ekranu izaberite **nedelju** (horizontalna lista na vrhu), pa **dan** (7 dugmadi ispod).
-2. Pregledajte strukturu treninga (blokovi, ponavljanja, trajanje) i pritisnite **Započni Trening**.
+2. Pregledajte strukturu treninga (blokovi, ponavljanja, trajanje) i pritisnite **Započni trening**.
 3. Posle uspešno završenog treninga aplikacija sama prelazi na sledeći dan. Posle 7. dana prelazi na 1. dan sledeće nedelje.
+
+Donja navigacija ima tri kartice: **Trening**, **Statistika** i **Podešavanja**.
 
 ### Ekran za vežbanje
 
@@ -51,16 +63,19 @@ Dugmad ispod prstena, redom:
 
 - **Jezik:** srpski ili engleski.
 - **Pauza između blokova:** 5, 10, 15, 20 ili 30 sekundi (podrazumevano 15 s).
-- **Vibracija** i **zvuk**: uključivanje i isključivanje.
-- **Rezervna kopija:** preuzimanje i učitavanje JSON fajla sa napretkom. Učitavanje **zamenjuje** trenutne podatke, a pre toga traži potvrdu i proverava ispravnost fajla.
-- **Brisanje svih podataka.**
+- **Vibracija** i **zvučni signali**: uključivanje i isključivanje.
+- **Sinhronizacija sa oblakom:** prijava i odjava Google nalogom.
+- **Upravljanje podacima:**
+  - preuzimanje rezervne kopije (JSON),
+  - učitavanje rezervne kopije (JSON): **zamenjuje** trenutne podatke, a pre toga traži potvrdu i proverava ispravnost fajla,
+  - brisanje lokalne istorije.
 
 ## Plan vežbanja
 
-Svaki dan ima 5 bloka, a dva tipa bloka su:
+Svaki dan ima 5 blokova, a dva tipa bloka su:
 
-- **Spori blokovi (Tension):** stezanje i opuštanje sa dužim držanjem. Držanje raste od 3 s / 3 s do 18 s / 8 s.
-- **Brzi blokovi (Fast tension):** uvek 1 s stezanje i 1 s opuštanje, sa velikim brojem ponavljanja.
+- **Spori blokovi (sporo stezanje):** stezanje i opuštanje sa dužim držanjem. Držanje raste od 3 s / 3 s do 18 s / 8 s.
+- **Brzi blokovi (brzo stezanje):** uvek 1 s stezanje i 1 s opuštanje, sa velikim brojem ponavljanja.
 
 Raspored blokova:
 
@@ -98,19 +113,31 @@ Svi tekstovi aplikacije su u objektu `I18N` na početku skripte, sa ključevima 
 
 Za dodavanje novog jezika dodajte novi objekat pored `sr` i `en`, proširite funkciju `detectLang()` i dodajte opciju u izbor jezika u Podešavanjima. Svi ključevi moraju postojati u svim jezicima. Izbor jezika se čuva u `settings.lang` i ulazi u rezervnu kopiju.
 
+## Rad bez interneta
+
+Fajl `sw.js` je service worker koji omogućava offline rad:
+
+- Pri instalaciji se u keš (`kegel-fit-v4`) smeštaju lokalni fajlovi (`index.html`, `manifest.webmanifest`, ikone iz `favicon/`) i biblioteke sa CDN-a. Ako neki fajl ne uspe da se preuzme, ostali se svejedno keširaju.
+- **Stranica** (`index.html`) se uvek prvo traži sa mreže, uz ograničenje od 4 sekunde. Ako mreža ne odgovori ili nema interneta, koristi se keširana verzija. Zato posle izmene `index.html` ne treba ništa menjati u `sw.js`.
+- **Ostali fajlovi** (biblioteke, fontovi, ikone) uzimaju se odmah iz keša, a u pozadini se osvežavaju.
+- Pozivi ka Firestore-u i Firebase Auth-u **nikad** ne prolaze kroz keš.
+- Verziju keša (`CACHE`) povećajte samo kad menjate spisak fajlova koji se unapred keširaju (`LOCAL` i `CDN`).
+
+Service worker radi samo preko `https://` ili `http://localhost`.
+
 ## Čuvanje podataka
 
 - **Lokalno:** u `localStorage` pregledača, pod ključem `kegel_fit_state`. Čuvaju se izabrana nedelja i dan, odrađeni dani, niz, istorija i podešavanja.
 - **Redni broj dana:** odrađeni dani se pamte kao broj od 1 do 175 (nedelja 1 dan 1 je 1, nedelja 25 dan 7 je 175). Rezervne kopije iz starije verzije, koja je imala samo prvu nedelju, i dalje se ispravno učitavaju.
-- **Cloud (opciono):** posle prijave Google nalogom podaci se sinhronizuju u Firebase Firestore, u dokument `users/{uid}`. Pri prvoj prijavi lokalni i oblak podaci se **spajaju** (odrađeni dani i istorija se objedine, niz je veći od dva), pa se ništa ne gubi.
+- **Cloud (opciono):** posle prijave Google nalogom podaci se sinhronizuju u Firebase Firestore, u dokument `users/{uid}`. Pri prvoj prijavi lokalni i oblak podaci se **spajaju** (odrađeni dani i istorija se objedine, niz je veći od dva), pa se ništa ne gubi. Dok niste na mreži, napredak se čuva na uređaju i sinhronizuje se čim se vratite online.
 
 ### Podešavanje Firebase-a (prijava i cloud baza)
 
-Dok se ne unese sopstvena konfiguracija, aplikacija radi u lokalnom režimu, a u prozoru za prijavu piše da cloud nije podešen.
+U `index.html` je već upisana konfiguracija autorovog Firebase projekta. Ako objavljujete sopstvenu kopiju aplikacije, napravite **svoj** Firebase projekat i zamenite je. Ako u `FIREBASE_CONFIG` ostanu vrednosti `YOUR_...`, aplikacija radi u lokalnom režimu, a u prozoru za prijavu piše da cloud nije podešen.
 
 1. **Napravite projekat** u [Firebase konzoli](https://console.firebase.google.com/) (Add project). Google Analytics nije potreban.
 2. **Dodajte Web aplikaciju:** Project settings → Your apps → ikona `</>` → unesite naziv → Register app. Kopirajte objekat `firebaseConfig`.
-3. **Zalepite konfiguraciju** u `kegel_fit_web_app.html`, u objekat `FIREBASE_CONFIG` na početku modula (`<script type="module">`). API ključ nije tajna: bezbednost obezbeđuju pravila i dozvoljeni domeni.
+3. **Zalepite konfiguraciju** u `index.html`, u objekat `FIREBASE_CONFIG` na početku modula (`<script type="module">`). API ključ nije tajna: bezbednost obezbeđuju pravila i dozvoljeni domeni.
 4. **Uključite Google prijavu:** Build → Authentication → Get started → Sign-in method → Google → Enable. Izaberite e-adresu za podršku i sačuvajte.
 5. **Napravite Firestore bazu:** Build → Firestore Database → Create database. Izaberite lokaciju bliže sebi (npr. `eur3`) i počnite u production režimu.
 6. **Postavite pravila:** Firestore → Rules → zalepite sadržaj fajla [`firestore.rules`](firestore.rules) → Publish. Pravila dozvoljavaju svakom korisniku samo njegov dokument `users/{uid}`, a sve ostalo zabranjuju.
@@ -118,13 +145,13 @@ Dok se ne unese sopstvena konfiguracija, aplikacija radi u lokalnom režimu, a u
 
 #### Testiranje na računaru
 
-Google prijava **ne radi** kad se stranica otvori kao fajl (`file://`). Pokrenite lokalni server u folderu sa aplikacijom:
+Google prijava i service worker **ne rade** kad se stranica otvori kao fajl (`file://`). Pokrenite lokalni server u folderu sa aplikacijom:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-pa otvorite `http://localhost:8080/kegel_fit_web_app.html`.
+pa otvorite `http://localhost:8080/`.
 
 #### Česte greške
 
@@ -144,21 +171,26 @@ pa otvorite `http://localhost:8080/kegel_fit_web_app.html`.
 | Plan, tajmer, statistika | Svi savremeni pregledači |
 | Zvuk | Svi savremeni pregledači (Web Audio) |
 | Vibracija | Chrome i Firefox na Androidu. **Ne radi na iPhone-u (Safari).** |
+| Ekran ostaje upaljen | Pregledači sa podrškom za Screen Wake Lock (Chrome, Edge, Safari 16.4+) |
+| Offline rad i instalacija | Pregledači sa podrškom za service worker, preko `https://` |
 
 Zvuk i vibracija počinju tek posle dodira na ekran (npr. na dugme Započni), jer pregledači ne dozvoljavaju automatsko pokretanje.
 
 ## Struktura projekta
 
-- `kegel_fit_web_app.html`: cela aplikacija (HTML, CSS i JavaScript), uz poseban modul unutar istog fajla za Firebase
-- `README.md` i `README.en.md`: dokumentacija na srpskom i engleskom
+- `index.html`: cela aplikacija (HTML, CSS i JavaScript), uz poseban modul unutar istog fajla za Firebase
+- `sw.js`: service worker za rad bez interneta
+- `manifest.webmanifest`: podaci za instalaciju na početni ekran (naziv, boje, ikone)
+- `favicon/`: ikone aplikacije
 - `firestore.rules`: pravila za Firestore bazu
+- `README.md` i `README.en.md`: dokumentacija na srpskom i engleskom
 - `LICENSE`: GNU GPL v3
 
 ## Licenca
 
 Kegel Fit je slobodan softver pod licencom **GNU General Public License, verzija 3** (GPL-3.0). Možete ga slobodno koristiti, proučavati, menjati i deliti, pod uslovom da izmenjene verzije koje delite takođe ostanu pod GPL licencom i da im je dostupan izvorni kod.
 
-Pun tekst licence je u fajlu [`LICENSE`](LICENSE), a obaveštenje o autorskim pravima je na početku fajla `kegel_fit_web_app.html`.
+Pun tekst licence je u fajlu [`LICENSE`](LICENSE), a obaveštenje o autorskim pravima je na početku fajla `index.html`.
 
 ```
 Copyright (C) 2026  Milan (milangru)

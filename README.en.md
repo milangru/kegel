@@ -2,7 +2,7 @@
 
 *[Srpska verzija](README.md)*
 
-A guided pelvic floor (Kegel) workout web app in a single HTML file: tense/relax timer, vibration and sound cues, a 25-week plan and progress tracking.
+A guided pelvic floor (Kegel) workout web app: tense/relax timer, vibration and sound cues, a 25-week plan and progress tracking. It runs in the browser, can be installed to your phone's home screen and works offline.
 
 > **Note:** this app is a training aid, not medical advice. If you have any health problems or feel pain while exercising, talk to a doctor or physiotherapist.
 
@@ -10,28 +10,40 @@ A guided pelvic floor (Kegel) workout web app in a single HTML file: tense/relax
 
 - **25-week plan**, 7 days per week, 5 blocks per day. Session length grows from about 2:39 (week 1, day 1) to about 15:00 (week 25, day 7).
 - **Free choice** of any week and any day (nothing is locked).
-- **Fullscreen workout screen** with a ring that shows progress through the set, TENSE / RELAX labels and a countdown.
+- **Fullscreen workout screen** with a ring that shows progress through the set, TENSE / RELAX labels and a countdown. The screen stays on during the workout.
 - **Vibration** that runs continuously while TENSE is active and stops on RELAX.
 - **Sound cues** when the phase changes.
-- **Two languages:** Serbian (Latin script) and English. On first launch the language follows the browser (Serbian, Croatian and Bosnian give Serbian, everything else English). You can change it in Settings, and the choice is saved and synced through Firebase.
+- **Offline use (PWA):** the app can be installed to the home screen and works without internet after the first load.
 - **Statistics:** streak, completed workouts, total time and history.
+- **Two languages:** Serbian (Latin script) and English. On first launch the language follows the browser (Serbian, Croatian and Bosnian give Serbian, everything else English). You can change it in Settings, and the choice is saved and synced through Firebase.
 - **Backup** of your data (export and import a JSON file).
 - Optional **Google sign-in** and sync to Firebase Firestore.
 
 ## Running the app
 
-No installation or build step is needed.
+No installation or build step is needed. The whole app is in `index.html`.
 
-1. Open `kegel_fit_web_app.html` in a browser (double-click or `File → Open`).
-2. To use it on a phone, put the file on any static hosting (for example GitHub Pages) and open that address in the browser.
+1. Put the contents of the repository on any static hosting (for example GitHub Pages) and open that address in the browser.
+2. To try it quickly on a computer, start a local server (see [Testing on your computer](#testing-on-your-computer)).
 
-An internet connection is needed when the page loads, because these libraries come from a CDN: Tailwind CSS, Font Awesome and Google Fonts (Inter). Workout data is stored locally in the browser.
+You can also open `index.html` by double-clicking it, but then offline mode (the service worker) and Google sign-in **do not work**, because both need `http://` or `https://`.
+
+An internet connection is needed on the first load, because these libraries come from a CDN: Tailwind CSS, Font Awesome, Google Fonts (Inter) and the Firebase SDK. The service worker then keeps them in its cache, so the app also works without internet afterwards.
+
+### Installing on a phone
+
+- **Android (Chrome):** menu (⋮) → *Install app* or *Add to Home screen*.
+- **iPhone (Safari):** Share button → *Add to Home Screen*.
+
+The installed app opens fullscreen, without the browser bar, in portrait orientation.
 
 ## How to use
 
 1. On the home screen pick a **week** (horizontal list at the top), then a **day** (the 7 buttons below it).
 2. Look at the workout structure (blocks, reps, durations) and press **Start workout**.
 3. After a finished workout the app moves to the next day by itself. After day 7 it moves to day 1 of the next week.
+
+The bottom navigation has three tabs: **Workout**, **Stats** and **Settings**.
 
 ### Workout screen
 
@@ -51,16 +63,19 @@ Buttons under the ring, in order:
 
 - **Language:** Serbian or English.
 - **Rest between blocks:** 5, 10, 15, 20 or 30 seconds (default 15 s).
-- **Vibration** and **sound:** on or off.
-- **Backup:** download or load a JSON file with your progress. Loading **replaces** your current data; the app asks for confirmation first and validates the file.
-- **Delete all data.**
+- **Vibration** and **sound cues:** on or off.
+- **Cloud sync:** sign in and out with a Google account.
+- **Data management:**
+  - download a backup (JSON),
+  - load a backup (JSON): this **replaces** your current data; the app asks for confirmation first and validates the file,
+  - delete local history.
 
 ## Workout plan
 
 Every day has 5 blocks of two kinds:
 
-- **Slow blocks (Slow tension):** tense and relax with longer holds. The hold grows from 3 s / 3 s up to 18 s / 8 s.
-- **Fast blocks (Fast tension):** always 1 s tense and 1 s relax, with many reps.
+- **Slow blocks (slow tension):** tense and relax with longer holds. The hold grows from 3 s / 3 s up to 18 s / 8 s.
+- **Fast blocks (fast tension):** always 1 s tense and 1 s relax, with many reps.
 
 Block order:
 
@@ -98,19 +113,31 @@ All app texts are in the `I18N` object at the start of the script, with keys for
 
 To add a new language, add another object next to `sr` and `en`, extend `detectLang()` and add an option to the language select in Settings. Every key must exist in every language. The chosen language is stored in `settings.lang` and is included in the backup.
 
+## Offline use
+
+The file `sw.js` is a service worker that makes offline use possible:
+
+- On install it puts the local files (`index.html`, `manifest.webmanifest`, the icons from `favicon/`) and the CDN libraries into the cache (`kegel-fit-v4`). If one file fails to download, the others are still cached.
+- The **page** (`index.html`) is always requested from the network first, with a 4 second limit. If the network does not answer or you are offline, the cached version is used. This means you do not need to touch `sw.js` after changing `index.html`.
+- **Other files** (libraries, fonts, icons) are served from the cache immediately and refreshed in the background.
+- Calls to Firestore and Firebase Auth **never** go through the cache.
+- Increase the cache version (`CACHE`) only when you change the list of precached files (`LOCAL` and `CDN`).
+
+The service worker only works over `https://` or `http://localhost`.
+
 ## Data storage
 
 - **Locally:** in the browser's `localStorage` under the key `kegel_fit_state`. It holds the selected week and day, completed days, streak, history and settings.
 - **Day number:** completed days are stored as a number from 1 to 175 (week 1 day 1 is 1, week 25 day 7 is 175). Backups from the older version, which had only the first week, still load correctly.
-- **Cloud (optional):** after signing in with Google, data is synced to Firebase Firestore, into the document `users/{uid}`. On first sign-in, local and cloud data are **merged** (completed days and history are combined, the streak is the larger of the two), so nothing is lost.
+- **Cloud (optional):** after signing in with Google, data is synced to Firebase Firestore, into the document `users/{uid}`. On first sign-in, local and cloud data are **merged** (completed days and history are combined, the streak is the larger of the two), so nothing is lost. While you are offline, progress is kept on the device and synced as soon as you are back online.
 
 ### Firebase setup (sign-in and cloud database)
 
-Until you add your own configuration the app works in local mode, and the sign-in window says that cloud sync is not set up.
+`index.html` already contains the configuration of the author's Firebase project. If you publish your own copy of the app, create **your own** Firebase project and replace it. If `FIREBASE_CONFIG` keeps the `YOUR_...` values, the app works in local mode, and the sign-in window says that cloud sync is not set up.
 
 1. **Create a project** in the [Firebase console](https://console.firebase.google.com/) (Add project). Google Analytics is not needed.
 2. **Add a Web app:** Project settings → Your apps → the `</>` icon → enter a name → Register app. Copy the `firebaseConfig` object.
-3. **Paste the configuration** into `kegel_fit_web_app.html`, into the `FIREBASE_CONFIG` object at the start of the module (`<script type="module">`). The API key is not a secret: security comes from the rules and the authorized domains.
+3. **Paste the configuration** into `index.html`, into the `FIREBASE_CONFIG` object at the start of the module (`<script type="module">`). The API key is not a secret: security comes from the rules and the authorized domains.
 4. **Enable Google sign-in:** Build → Authentication → Get started → Sign-in method → Google → Enable. Pick a support email and save.
 5. **Create a Firestore database:** Build → Firestore Database → Create database. Choose a location close to you (for example `eur3`) and start in production mode.
 6. **Publish the rules:** Firestore → Rules → paste the contents of [`firestore.rules`](firestore.rules) → Publish. The rules let each user access only their own document `users/{uid}` and deny everything else.
@@ -118,13 +145,13 @@ Until you add your own configuration the app works in local mode, and the sign-i
 
 #### Testing on your computer
 
-Google sign-in **does not work** when the page is opened as a file (`file://`). Start a local server in the app's folder:
+Google sign-in and the service worker **do not work** when the page is opened as a file (`file://`). Start a local server in the app's folder:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-then open `http://localhost:8080/kegel_fit_web_app.html`.
+then open `http://localhost:8080/`.
 
 #### Common errors
 
@@ -144,21 +171,26 @@ then open `http://localhost:8080/kegel_fit_web_app.html`.
 | Plan, timer, statistics | All modern browsers |
 | Sound | All modern browsers (Web Audio) |
 | Vibration | Chrome and Firefox on Android. **Does not work on iPhone (Safari).** |
+| Screen stays on | Browsers with Screen Wake Lock support (Chrome, Edge, Safari 16.4+) |
+| Offline use and installation | Browsers with service worker support, over `https://` |
 
 Sound and vibration start only after you tap the screen (for example the Start button), because browsers do not allow them to start automatically.
 
 ## Project structure
 
-- `kegel_fit_web_app.html`: the whole app (HTML, CSS and JavaScript), with a separate module inside the same file for Firebase
-- `README.md` and `README.en.md`: documentation in Serbian and English
+- `index.html`: the whole app (HTML, CSS and JavaScript), with a separate module inside the same file for Firebase
+- `sw.js`: service worker for offline use
+- `manifest.webmanifest`: home screen installation data (name, colours, icons)
+- `favicon/`: app icons
 - `firestore.rules`: Firestore security rules
+- `README.md` and `README.en.md`: documentation in Serbian and English
 - `LICENSE`: GNU GPL v3
 
 ## License
 
 Kegel Fit is free software under the **GNU General Public License, version 3** (GPL-3.0). You may use, study, change and share it, as long as modified versions you distribute stay under the GPL and come with their source code.
 
-The full license text is in [`LICENSE`](LICENSE), and the copyright notice is at the start of `kegel_fit_web_app.html`.
+The full license text is in [`LICENSE`](LICENSE), and the copyright notice is at the start of `index.html`.
 
 ```
 Copyright (C) 2026  Milan (milangru)
