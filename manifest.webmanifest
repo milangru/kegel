@@ -1,15 +1,41 @@
 {
-  "name": "Kegel Fit",
-  "short_name": "Kegel Fit",
-  "description": "Dnevni trening za karlično dno",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#111827",
-  "theme_color": "#111827",
-  "icons": [
-    { "src": "favicon/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "favicon/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
-  ]
+    "name": "Kegel Fit",
+    "short_name": "Kegel Fit",
+    "description": "Dnevni trening za karlično dno",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#111827",
+    "theme_color": "#111827",
+    "icons": [
+        {
+            "src": "favicon/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "favicon/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "favicon/screenshot1.jpg",
+            "sizes": "720x1600",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "Glavni ekran aplikacije"
+        },
+        {
+            "src": "favicon/screenshot2.jpg",
+            "sizes": "720x1600",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "Ekran sa vežbama"
+        }
+    ]
 }
