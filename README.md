@@ -37,6 +37,24 @@ Potrebna je internet veza pri prvom učitavanju, jer se sledeće biblioteke uči
 
 Instalirana aplikacija se otvara preko celog ekrana, bez trake pregledača, u uspravnom položaju.
 
+### Android aplikacija (APK)
+
+Za Android postoji i gotov APK, napravljen preko [PWABuilder-a](https://www.pwabuilder.com/). To je ista aplikacija upakovana kao Trusted Web Activity: otvara se u pregledaču telefona, ali bez adresne trake.
+
+1. Preuzmite [`kegel-fit.apk`](https://milangru.github.io/kegel/apk/kegel-fit.apk) (ili iz foldera [`apk/`](apk/) u repozitorijumu).
+2. Otvorite preuzeti fajl i dozvolite instalaciju iz ovog izvora kad Android to zatraži (*Instaliraj nepoznate aplikacije*).
+3. Pri pokretanju se nakratko prikaže obaveštenje „Running in <pregledač>“. To je normalno i samo nestaje.
+
+APK nije na Google Play-u. Aplikacija se ažurira sama jer učitava sajt, pa novi APK treba samo ako se menja ikona, naziv ili podešavanja paketa.
+
+Za iPhone nema APK-a: koristite instalaciju preko Safarija opisanu iznad.
+
+#### Ako pravite sopstveni APK
+
+- Na PWABuilder-u unesite adresu svog sajta. Sa njim dobijate APK, `assetlinks.json` i potpisni ključ (`signing.keystore`).
+- Fajl `assetlinks.json` mora da bude dostupan na `https://<korisnik>.github.io/.well-known/assetlinks.json`, dakle na **korenu domena**, a ne u podfolderu projekta. Na GitHub Pages-u to znači poseban repozitorijum `<korisnik>.github.io` sa fajlovima `.well-known/assetlinks.json` i praznim `.nojekyll` u korenu. Bez toga se APK pokreće, ali sa vidljivom adresnom trakom.
+- `signing.keystore` i `signing-key-info.txt` **nikad ne objavljujte** u javnom repozitorijumu. Čuvajte ih lokalno uz rezervnu kopiju: bez njih ne možete da izdate ažuriranje iste aplikacije.
+
 ## Kako se koristi
 
 1. Na početnom ekranu izaberite **nedelju** (horizontalna lista na vrhu), pa **dan** (7 dugmadi ispod).
@@ -182,6 +200,7 @@ Zvuk i vibracija počinju tek posle dodira na ekran (npr. na dugme Započni), je
 - `sw.js`: service worker za rad bez interneta
 - `manifest.webmanifest`: podaci za instalaciju na početni ekran (naziv, boje, ikone)
 - `favicon/`: ikone aplikacije
+- `apk/`: Android aplikacija (`kegel-fit.apk`)
 - `firestore.rules`: pravila za Firestore bazu
 - `README.md` i `README.en.md`: dokumentacija na srpskom i engleskom
 - `LICENSE`: GNU GPL v3

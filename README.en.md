@@ -37,6 +37,24 @@ An internet connection is needed on the first load, because these libraries come
 
 The installed app opens fullscreen, without the browser bar, in portrait orientation.
 
+### Android app (APK)
+
+A ready-made APK is also available, built with [PWABuilder](https://www.pwabuilder.com/). It is the same app packaged as a Trusted Web Activity: it opens in the phone's browser engine, but without the address bar.
+
+1. Download [`kegel-fit.apk`](https://milangru.github.io/kegel/apk/kegel-fit.apk) (or get it from the [`apk/`](apk/) folder in the repository).
+2. Open the downloaded file and allow installation from this source when Android asks (*Install unknown apps*).
+3. On launch a short notice "Running in <browser>" appears. This is normal and disappears by itself.
+
+The APK is not on Google Play. The app updates itself because it loads the website, so a new APK is only needed if you change the icon, name or package settings.
+
+There is no APK for iPhone: use the Safari installation described above.
+
+#### If you build your own APK
+
+- On PWABuilder enter the address of your site. You get an APK, `assetlinks.json` and a signing key (`signing.keystore`).
+- `assetlinks.json` must be reachable at `https://<user>.github.io/.well-known/assetlinks.json`, that is at the **root of the domain**, not in a project subfolder. On GitHub Pages this means a separate repository `<user>.github.io` containing `.well-known/assetlinks.json` and an empty `.nojekyll` in its root. Without it the APK still runs, but with a visible address bar.
+- **Never publish** `signing.keystore` and `signing-key-info.txt` in a public repository. Keep them locally with a backup: without them you cannot release an update of the same app.
+
 ## How to use
 
 1. On the home screen pick a **week** (horizontal list at the top), then a **day** (the 7 buttons below it).
@@ -182,6 +200,7 @@ Sound and vibration start only after you tap the screen (for example the Start b
 - `sw.js`: service worker for offline use
 - `manifest.webmanifest`: home screen installation data (name, colours, icons)
 - `favicon/`: app icons
+- `apk/`: Android app (`kegel-fit.apk`)
 - `firestore.rules`: Firestore security rules
 - `README.md` and `README.en.md`: documentation in Serbian and English
 - `LICENSE`: GNU GPL v3
